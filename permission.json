@@ -1,0 +1,66 @@
+[
+  {
+    "subscriber": [
+      {
+        "module": "setting",
+        "action": "index"
+      },
+      {
+        "module": "profile",
+        "action": "index"
+      },
+      {
+        "module": "inbox",
+        "action": "index"
+      },
+      {
+        "module": "client",
+        "action": "domain"
+      },
+      {
+        "module": "client",
+        "action": "hosting"
+      },
+      {
+        "module": "client",
+        "action": "theme"
+      },
+      {
+        "module": "client",
+        "action": "billing"
+      },
+      {
+        "module": "client",
+        "action": "checkout"
+      },
+      {
+        "module": "client",
+        "action": "cart"
+      },
+      {
+        "module": "client",
+        "action": "ticket"
+      },
+      {
+        "module": "ticket",
+        "action": "new"
+      },
+      {
+        "module": "ticket",
+        "action": "detail"
+      },
+      {
+        "module": "client",
+        "action": "notification"
+      },
+      {
+        "module": "client",
+        "action": "email"
+      },
+      {
+        "module": "client",
+        "action": "plugin"
+      }
+    ]
+  }
+]
