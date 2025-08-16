@@ -456,6 +456,7 @@ $(function () {
         action: "ajax_load-type-ticket",
         security: self.security,
         type: self.currentType,
+        status: self.currentStatus,
       };
 
       callAjax(

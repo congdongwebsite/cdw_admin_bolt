@@ -117,6 +117,7 @@ class ConstantAdmin
         $roundAmount = 2;
         $roundAmountVND = 0;
         $formatDate = "DD/MM/YYYY";
+        $formatDateBilling = "yyyy-MM-DD HH:mm:ss";
         $formatDateDatepicker = "dd/mm/yyyy";
         $swalOptions = (object) [
             "timer" => 1000,
@@ -134,6 +135,7 @@ class ConstantAdmin
             "roundAmount" => $roundAmount,
             "roundAmountVND" => $roundAmountVND,
             "formatDate" => $formatDate,
+            "formatDateBilling" => $formatDateBilling,
             "formatDateDatepicker" => $formatDateDatepicker,
             "OptionAutoNumericPacking" => [
                 "decimalCharacter" => $decimalSymbol,

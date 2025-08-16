@@ -929,11 +929,11 @@ function create_plugin_posttype()
         'labels' => $labels,
         'supports' => array('title', 'editor', 'thumbnail', 'excerpt'),
         'taxonomies' => array(),
-        'hierarchical' => false,
-        'exclude_from_search' => false,
-        'publicly_queryable' => false,
+        'hierarchical' => True,
+        'exclude_from_search' => True,
+        'publicly_queryable' => True,
         'has_archive' => false,
-        'public' => false,
+        'public' => True,
         'show_ui' => false,
         'show_in_menu' => false,
         'show_in_admin_bar' => false,
@@ -943,7 +943,7 @@ function create_plugin_posttype()
         'capability_type' => 'post',
         'show_in_rest' => false, 'rewrite' => array(
             'slug' => 'kho-plugin', // use this slug instead of post type name
-            'with_front' => FALSE // if you have a permalink base such as /blog/ then setting this to false ensures your custom post type permalink structure will be /products/ instead of /blog/products/
+            'with_front' => True // if you have a permalink base such as /blog/ then setting this to false ensures your custom post type permalink structure will be /products/ instead of /blog/products/
         ),
     );
     register_post_type('plugin', $args);
@@ -1650,3 +1650,25 @@ function create_version_detail_cpt()
     register_post_type('version-detail', $args);
 }
 add_action('init', 'create_version_detail_cpt', 0);
+
+
+
+function create_license_post_type()
+{
+    register_post_type(
+        'license',
+        array(
+            'labels'      => array(
+                'name'          => __('Licenses'),
+                'singular_name' => __('License'),
+            ),
+            'public'      => false,
+            'has_archive' => false,
+            'rewrite'     => array('slug' => 'licenses'),
+            'show_in_rest' => true,
+            'supports'    => array('title', 'editor', 'custom-fields'),
+            'menu_icon'   => 'dashicons-admin-network',
+        )
+    );
+}
+add_action('init', 'create_license_post_type');

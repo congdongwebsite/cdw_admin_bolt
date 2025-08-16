@@ -9,10 +9,9 @@ global $CDWFunc;
 
             <?php
             if ($CDWFunc->isAdministrator()) {
-                $customer_id = get_user_meta($userCurrent->ID, 'customer-id', true);
+                $customer_id = get_user_meta($userCurrent->ID, 'customer-default-id', true);
             ?>
                 <label><select id='customer-id' name='customer-id' class='select2 form-control' data-value="<?php echo $customer_id; ?>"></select></label>
-
             <?php
             } else {
             ?>

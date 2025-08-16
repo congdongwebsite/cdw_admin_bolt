@@ -1,8 +1,3 @@
-<?php
-if (!current_user_can('read')) {
-    wp_die('Bạn không có quyền truy cập chức năng này');
-}
-?>
 <!doctype html>
 <html lang="en">
 

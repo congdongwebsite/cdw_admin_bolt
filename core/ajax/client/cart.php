@@ -10,6 +10,7 @@ class AjaxClientCart
         add_action('wp_ajax_ajax_add-domain-client-cart',  array($this, 'func_add_domain_client_cart'));
         add_action('wp_ajax_ajax_add-hosting-client-cart',  array($this, 'func_add_hosting_client_cart'));
         add_action('wp_ajax_ajax_add-email-client-cart',  array($this, 'func_add_email_client_cart'));
+        add_action('wp_ajax_ajax_add-plugin-client-cart',  array($this, 'func_add_plugin_client_cart'));
         add_action('wp_ajax_ajax_client-cart-delete',  array($this, 'func_client_cart_delete'));
         add_action('wp_ajax_ajax_client-cart-update',  array($this, 'func_client_cart_update'));
         add_action('wp_ajax_ajax_choose-hosting-client-cart',  array($this, 'func_choose_hosting_client_cart'));
@@ -24,6 +25,7 @@ class AjaxClientCart
         add_action('wp_ajax_ajax_choose-domain-frontend-client-cart',  array($this, 'func_choose_domain_frontend_client_cart'));
         add_action('wp_ajax_ajax_choose-hosting-frontend-client-cart',  array($this, 'func_choose_hosting_frontend_client_cart'));
         add_action('wp_ajax_ajax_choose-email-frontend-client-cart',  array($this, 'func_choose_email_frontend_client_cart'));
+        add_action('wp_ajax_ajax_choose-plugin-frontend-client-cart',  array($this, 'func_choose_plugin_frontend_client_cart'));
     }
     public function func_get_list()
     {
@@ -128,9 +130,6 @@ class AjaxClientCart
         if ($tax_has && (empty($tax_has) || empty($tax_company) || empty($tax_code))) {
             wp_send_json_error(['msg' => 'Vui lòng hoàn tất thông tin xuất hoá đơn']);
         }
-        $ids = array_column($data, 'quantity', 'id');
-        $CDWCart->deleteNotExists($ids);
-
         $items =  $CDWCart->get();
 
         $userC = wp_get_current_user();
@@ -142,94 +141,98 @@ class AjaxClientCart
             wp_send_json_error(['msg' => 'Không có dịch vụ trong giỏ hàng']);
         }
 
-        $changeQuantity = array_column($items, 'quantity', 'idc');
         $changePrice = array_column($items, 'price', 'idc');
         foreach ($items as $key => $item) {
-            if (array_key_exists($key, $ids)) {
-                $quantity = (float) $ids[$key];
-                $price = 0;
-                switch ($item["type"]) {
-                    case 'customer-domain':
-                        $domain = $item["domain"];
-                        $type = get_post_meta($item["id"], 'domain-type', true);
-                        $price = (float) get_post_meta($type, 'gia_han', true);
-                        if (!$price) {
-                            $price = (float)  $CDWFunc->wpdb->get_price_domain($domain);
-                        }
-                        if (!$price) {
-                            wp_send_json_error(['msg' => 'Domain không hợp lệ.']);
-                        }
-                        break;
-                    case 'customer-hosting':
-                        $id = $item["id"];
-                        $type = get_post_meta($id, 'type', true);
-                        $price = (float) get_post_meta($type, 'gia_han', true);
+            $price = 0;
+            switch ($item["type"]) {
+                case 'customer-domain':
+                    $domain = $item["domain"];
+                    $type = get_post_meta($item["id"], 'domain-type', true);
+                    $price = (float) get_post_meta($type, 'gia_han', true);
+                    if ($price === false || $price == -1) {
+                        $price = (float)  $CDWFunc->wpdb->get_price_domain($domain);
+                    }
+                    if ($price === false || $price == -1) {
+                        wp_send_json_error(['msg' => 'Domain không hợp lệ.']);
+                    }
+                    break;
+                case 'customer-hosting':
+                    $id = $item["id"];
+                    $type = get_post_meta($id, 'type', true);
+                    $price = (float) get_post_meta($type, 'gia_han', true);
 
-                        if ($price == -1) {
-                            $price = (float) get_post_meta($id, 'price', true);
-                        }
-                        if (!$price) {
-                            wp_send_json_error(['msg' => 'Gói hosting không hợp lệ.']);
-                        }
-                        break;
-
-                    case 'customer-email':
-                        $id = $item["id"];
-                        $type = get_post_meta($id, 'email-type', true);
-                        $price = (float) get_post_meta($type, 'gia_han', true);
-
-                        if ($price == -1) {
-                            $price = (float) get_post_meta($id, 'price', true);
-                        }
-
-                        if (!$price) {
-                            wp_send_json_error(['msg' => 'Gói email không hợp lệ.']);
-                        }
-                        break;
-                    case 'manage-hosting':
-                        $id = $item["id"];
-                        $price = (float) get_post_meta($id, 'gia', true);
-                        if (!$price) {
-                            wp_send_json_error(['msg' => 'Gói hosting không hợp lệ.']);
-                        }
-                        break;
-                    case 'manage-email':
-                        $id = $item["id"];
-                        $price = (float) get_post_meta($id, 'gia', true);
-                        if (!$price) {
-                            wp_send_json_error(['msg' => 'Gói email không hợp lệ.']);
-                        }
-                        break;
-
-                    case 'manage-domain':
-                        $id = $item["id"];
-                        $price = (float) get_post_meta($id, 'gia', true);
-                        if (!$price) {
-                            wp_send_json_error(['msg' => 'Domain không hợp lệ.']);
-                        }
-                        break;
-                    case 'site-managers':
-                        $id = $item["id"];
+                    if ($price == -1) {
                         $price = (float) get_post_meta($id, 'price', true);
-                        if (!$price) {
-                            wp_send_json_error(['msg' => 'Giao diện không hợp lệ.']);
-                        }
-                        break;
+                    }
+                    if ($price === false || $price == -1) {
+                        wp_send_json_error(['msg' => 'Gói hosting không hợp lệ.']);
+                    }
+                    break;
 
-                    case 'manage-plugin':
-                        $id = $item["id"];
+                case 'customer-email':
+                    $id = $item["id"];
+                    $type = get_post_meta($id, 'email-type', true);
+                    $price = (float) get_post_meta($type, 'gia_han', true);
+
+                    if ($price == -1) {
                         $price = (float) get_post_meta($id, 'price', true);
-                        if (!$price) {
-                            wp_send_json_error(['msg' => 'Plugin không hợp lệ.']);
-                        }
-                        break;
-                }
-                $changeQuantity[$key] = $quantity;
-                $changePrice[$key] = $price;
+                    }
+
+                    if ($price === false || $price == -1) {
+                        wp_send_json_error(['msg' => 'Gói email không hợp lệ.']);
+                    }
+                    break;
+
+                case 'customer-plugin':
+                    $id = $item["id"];
+                    $type = get_post_meta($id, 'plugin-type', true);
+                    $price = (float) get_post_meta($type, 'price', true);
+                    if ($price === false || $price == -1) {
+                        wp_send_json_error(['msg' => 'Gói plugin không hợp lệ.']);
+                    }
+                    break;
+                case 'manage-hosting':
+                    $id = $item["id"];
+                    $price = (float) get_post_meta($id, 'gia', true);
+                    if ($price === false || $price == -1) {
+                        wp_send_json_error(['msg' => 'Gói hosting không hợp lệ.']);
+                    }
+                    break;
+                case 'manage-email':
+                    $id = $item["id"];
+                    $price = (float) get_post_meta($id, 'gia', true);
+                    if ($price === false || $price == -1) {
+                        wp_send_json_error(['msg' => 'Gói email không hợp lệ.']);
+                    }
+                    break;
+
+                case 'manage-domain':
+                    $id = $item["id"];
+                    $price = (float) get_post_meta($id, 'gia', true);
+                    if ($price === false || $price == -1) {
+                        wp_send_json_error(['msg' => 'Domain không hợp lệ.']);
+                    }
+                    break;
+                case 'site-managers':
+                    $id = $item["id"];
+                    $price = (float) get_post_meta($id, 'price', true);
+                    if ($price === false || $price == -1) {
+                        wp_send_json_error(['msg' => 'Giao diện không hợp lệ.']);
+                    }
+                    break;
+
+                case 'manage-plugin':
+                    $id = $item["id"];
+                    $price = (float) get_post_meta($id, 'price', true);
+                    if ($price === false || $price == -1) {
+                        wp_send_json_error(['msg' => 'Plugin không hợp lệ.']);
+                    }
+                    break;
             }
+            $changePrice[$key] = $price;
         }
+
         $CDWCart->changePrice($changePrice);
-        $CDWCart->changeQuantity($changeQuantity);
         $CDWCart->setTax($tax_has, $tax_company, $tax_code, $tax_email);
         wp_send_json_success(['msg' => 'Chuyển qua trang thanh toán', 'checkout_url' => $CDWFunc->getUrl('billing', 'client', 'subaction=checkout&step=1'), 'security' => wp_create_nonce('wp_nonce_field')]);
 
@@ -257,15 +260,15 @@ class AjaxClientCart
                 $price = 0;
                 switch ($item["type"]) {
                     case 'customer-domain':
-                        $quantity  = 1;
+                        // $quantity  = 1;
                         $domain = $item["domain"];
                         $type = get_post_meta($item["id"], 'domain-type', true);
                         $price = (float) get_post_meta($type, 'gia_han', true);
 
-                        if (!$price) {
+                        if ($price === false || $price == -1) {
                             $price = (float)  $CDWFunc->wpdb->get_price_domain($domain);
                         }
-                        if (!$price) {
+                        if ($price === false || $price == -1) {
                             wp_send_json_error(['msg' => 'Domain không hợp lệ.']);
                         }
                         break;
@@ -273,38 +276,66 @@ class AjaxClientCart
                         $id = $item["id"];
                         $type = get_post_meta($id, 'type', true);
                         $price = (float) get_post_meta($type, 'gia_han', true);
-                        if (!$price) {
+                        if ($price === false || $price == -1) {
                             wp_send_json_error(['msg' => 'Gói hosting không hợp lệ.']);
+                        }
+                        break;
+                    case 'customer-email':
+                        $id = $item["id"];
+                        $type = get_post_meta($id, 'email-type', true);
+                        $price = (float) get_post_meta($type, 'gia_han', true);
+
+                        if ($price == -1) {
+                            $price = (float) get_post_meta($id, 'price', true);
+                        }
+
+                        if ($price === false || $price == -1) {
+                            wp_send_json_error(['msg' => 'Gói email không hợp lệ.']);
+                        }
+                        break;
+                    case 'customer-plugin':
+                        $id = $item["id"];
+                        $type = get_post_meta($id, 'plugin-type', true);
+                        $price = (float) get_post_meta($type, 'price', true);
+                        if ($price === false || $price == -1) {
+                            wp_send_json_error(['msg' => 'Gói plugin không hợp lệ.']);
                         }
                         break;
                     case 'manage-hosting':
                         $id = $item["id"];
                         $price = (float) get_post_meta($id, 'gia', true);
-                        if (!$price) {
+                        if ($price === false || $price == -1) {
                             wp_send_json_error(['msg' => 'Gói hosting không hợp lệ.']);
                         }
                         break;
 
                     case 'manage-domain':
-                        $quantity  = 1;
+                        // $quantity  = 1;
                         $id = $item["id"];
                         $price = (float) get_post_meta($id, 'gia', true);
-                        if (!$price) {
+                        if ($price === false || $price == -1) {
                             wp_send_json_error(['msg' => 'Domain không hợp lệ.']);
                         }
                         break;
                     case 'site-managers':
                         $id = $item["id"];
                         $price = (float) get_post_meta($id, 'price', true);
-                        if (!$price) {
+                        if ($price === false || $price == -1) {
                             wp_send_json_error(['msg' => 'Giao diện không hợp lệ.']);
                         }
                         break;
                     case 'manage-email':
                         $id = $item["id"];
                         $price = (float) get_post_meta($id, 'gia', true);
-                        if (!$price) {
+                        if ($price === false || $price == -1) {
                             wp_send_json_error(['msg' => 'Email không hợp lệ.']);
+                        }
+                        break;
+                    case 'manage-plugin':
+                        $id = $item["id"];
+                        $price = (float) get_post_meta($id, 'price', true);
+                        if ($price === false || $price == -1) {
+                            wp_send_json_error(['msg' => 'Plugin không hợp lệ.']);
                         }
                         break;
                 }
@@ -419,6 +450,34 @@ class AjaxClientCart
         wp_send_json_error(['msg' => 'Thêm giỏ hàng không thành công']);
         wp_die();
     }
+    public function func_add_plugin_client_cart()
+    {
+        global $CDWFunc, $CDWCart;
+        // First check the nonce, if it fails the function will break
+        check_ajax_referer('ajax-index-nonce', 'security');
+
+        $userC = wp_get_current_user();
+
+        $ids = isset($_POST['ids']) ? $_POST['ids'] : "";
+
+        $items = $this->get_service_plugin_cart($ids);
+
+        $cart_items = $CDWCart->get();
+        if ($CDWFunc->isAdministrator()) {
+            foreach ($cart_items as $item) {
+                $customer_id = get_post_meta($item["id"], "customer-id", true);
+                update_user_meta($userC->ID, 'customer-id', $customer_id);
+                break;
+            }
+        }
+
+        $CDWCart->addByExsitsId($items);
+
+        wp_send_json_success(['msg' => 'Thêm vào giỏ hàng thành công', 'cart_url' => $CDWFunc->getUrl('cart', 'client')]);
+
+        wp_send_json_error(['msg' => 'Thêm giỏ hàng không thành công']);
+        wp_die();
+    }
 
     public function func_choose_hosting_client_cart()
     {
@@ -504,7 +563,42 @@ class AjaxClientCart
         wp_send_json_error(['msg' => 'Thêm giỏ hàng không thành công']);
         wp_die();
     }
+    public function func_choose_plugin_frontend_client_cart()
+    {
+        global $CDWFunc, $CDWCart;
+        // First check the nonce, if it fails the function will break
+        check_ajax_referer('ajax-index-frontend-nonce', 'security');
 
+        $id = isset($_POST['id']) ? $_POST['id'] : "";
+
+        $price = (float) get_post_meta($id, 'price', true);
+        if ($id == -1 || $price == -1) {
+            wp_send_json_success([
+                'title' => 'Liên hệ',
+                'msg' => 'Vui lòng liên hệ để mua plugin',
+                'cart_url' => '/gio-hang'
+            ]);
+        }
+
+        $item = $CDWCart->newItem(
+            'manage-plugin',
+            $id,
+            get_post_meta($id, 'name', true),
+            "Đăng ký mua plugin",
+            $price,
+            1,
+            $price
+        );
+
+        $CDWCart->addByExsitsId([$item]);
+        wp_send_json_success([
+            'msg' => 'Bạn muốn mở giỏ hàng?',
+            'cart_url' => '/gio-hang'
+        ]);
+
+        wp_send_json_error(['msg' => 'Thêm giỏ hàng không thành công']);
+        wp_die();
+    }
     public function func_choose_domain_client_cart()
     {
         global $CDWFunc, $CDWCart;
@@ -627,6 +721,7 @@ class AjaxClientCart
                 case 'manage-hosting':
                 case 'manage-domain':
                 case 'manage-email':
+                case 'manage-plugin':
                     $item->quantity_uom = ' / Năm';
                     break;
                 case 'site-managers':
@@ -716,7 +811,7 @@ class AjaxClientCart
                 $price = (float) get_post_meta($id, 'price', true);
             }
             $service = get_the_title($type);
-            $service .= "/". get_post_meta($id, "ip", true);
+            $service .= "/" . get_post_meta($id, "ip", true);
             //if (empty($service)) 
             $note = " Hết hạn từ ngày " . $CDWFunc->date->convertDateTimeDisplay(get_post_meta($id, "expiry_date", true));
             $item = $CDWCart->newItem('customer-hosting', $id, $service, $note, $price, 1, $price);
@@ -735,10 +830,29 @@ class AjaxClientCart
                 $price = (float) get_post_meta($id, 'price', true);
             }
             $service = get_the_title($type);
-            $service .="/". get_post_meta($id, "ip", true);
+            $service .= "/" . get_post_meta($id, "ip", true);
             // if (empty($service)) 
             $note = " Hết hạn từ ngày " . $CDWFunc->date->convertDateTimeDisplay(get_post_meta($id, "expiry_date", true));
             $item = $CDWCart->newItem('customer-email', $id, $service, $note, $price, 1, $price);
+            $items[] = $item;
+        }
+        return $items;
+    }
+    public function get_service_plugin_cart($ids)
+    {
+        global $CDWFunc, $CDWCart;
+        $items = [];
+        foreach ($ids as $id) {
+            $type = get_post_meta($id, 'plugin-type', true);
+            $price = (float) get_post_meta($type, 'price', true);
+            if ($price == -1) {
+                $price = (float) get_post_meta($id, 'price', true);
+            }
+            $service = get_post_meta($id, "name", true);
+            $service .= "/" . mask_license(get_post_meta($id, "license", true));
+            // if (empty($service)) 
+            $note = " Hết hạn từ ngày " . $CDWFunc->date->convertDateTimeDisplay(get_post_meta($id, "expiry_date", true));
+            $item = $CDWCart->newItem('customer-plugin', $id, $service, $note, $price, 1, $price);
             $items[] = $item;
         }
         return $items;

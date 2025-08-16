@@ -300,8 +300,9 @@ class AjaxTicket
         }
 
         $type = isset($_POST['type']) ? $_POST['type'] : "domain";
+        $status = isset($_POST['status']) ? $_POST['status'] : null;
 
-        $data = $CDWTicket->getCountTicketTypes();
+        $data = $CDWTicket->getCountTicketTypes($status);
         $items = [];
 
         foreach ($CDWTicket->default_types as $key => $value) {

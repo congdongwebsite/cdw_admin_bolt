@@ -30,6 +30,7 @@ var managePlugin = (function (self, base) {
     { data: "image", title: "Ảnh" },
     { data: "title", title: "Tiêu đề" },
     { data: "name", title: "Tên plugin" },
+    { data: "module_version_name", title: "Module Version" },
     { data: "url", title: "URL" },
     { data: "price", title: "Giá" },
     { data: "type", title: "Loại" },
@@ -44,7 +45,7 @@ var managePlugin = (function (self, base) {
       render: imageFormatter,
     },
     {
-      targets: 4,
+      targets: 5,
       render: numberFormatterAmountVND,
     },
   ];

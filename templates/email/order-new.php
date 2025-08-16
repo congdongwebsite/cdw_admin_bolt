@@ -8,9 +8,9 @@ $date = $CDWFunc->date->convertDateTimeDisplay(get_post_meta($id, "date", true))
 
 $items = get_post_meta($id, 'items', true);
 $checkoutStatus = get_post_meta($id, "status", true);
-$total = get_post_meta($id, 'amount', true);
+$total = get_post_meta($id, 'sub_amount', true);
 $vat = get_post_meta($id, 'vat', true);
-$final = $total + $vat;
+$final = get_post_meta($id, 'amount', true);
 $note = get_post_meta($id, "note", true);
 
 
@@ -69,8 +69,9 @@ $note = get_post_meta($id, "note", true);
     </tr>
   </tbody>
 </table>
-<p style="text-align: center;"><strong>Cảm ơn Quý khách đã sử dụng dịch vụ của Cộng Đồng Web!</strong><br>
-  Thank you for using the service with congdongweb.com!</p>
-<p>Cộng Đồng Web nhận được yêu cầu của quý khách về việc mua sản phẩm dịch vụ chúng tôi về mã đơn: <b id="order-cdw">[#<?php echo $id; ?>]</b>, chúng tôi sẽ tiến hành xử lý và kích hoạt dịch vụ của bạn trong thời gian sớm nhất, bạn có thể theo giõi đơn hàng của bạn và thông tin đơn hàng qua website bên em để theo giõi.</p>
-<a class="botton-cdw" href="https://www.congdongweb.com/admin/" target="_blank">Đăng Nhập </a>
-<p>Quý khách vui lòng phản hồi cho chúng tôi qua Ticket này hoặc theo Hotline (+84) 38.627.0225 trường hợp cần hỗ trợ thêm thông tin. Cảm ơn Quý khách!</p>
+<p style="text-align: center;"><strong>Cảm ơn Quý khách đã tin tưởng sử dụng dịch vụ của Cộng Đồng Web!</strong></p>
+<p>Chúng tôi đã nhận được yêu cầu mua sản phẩm/dịch vụ của Quý khách với mã đơn hàng <b id="order-cdw">[#<?php echo $id; ?>]</b>. Đội ngũ của chúng tôi sẽ tiến hành xử lý và kích hoạt dịch vụ trong thời gian sớm nhất.</p>
+<p>Quý khách có thể theo dõi tình trạng và chi tiết đơn hàng trực tiếp trên website của chúng tôi.</p>
+<a class="botton-cdw" href="<?php echo $CDWFunc->getUrl('', '').'?urlredirect='.urlencode($CDWFunc->getUrl('billing', 'client', 'subaction=checkout&id=' . $id));?>" target="_blank">Đăng Nhập </a>
+<p>Nếu cần hỗ trợ thêm thông tin, vui lòng phản hồi qua ticket này hoặc liên hệ Hotline <b>(+84) 38 627 0225</b>.</p>
+<p>Xin chân thành cảm ơn Quý khách!</p>

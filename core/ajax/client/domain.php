@@ -191,6 +191,9 @@ class AjaxClientDomain
             $item['urlDomain'] =  trim($item["url_dns"]);
 
             $item['status'] = $status;
+            $customer = get_post_meta(get_post_meta($post->ID, 'customer-id', true), 'name', true);
+            $item['customer'] = $customer;
+            $item['urlredirect'] = $CDWFunc->getUrl('detail', 'customer', 'id=' . get_post_meta($post->ID, 'customer-id', true));
             $item['action'] = '';
             $item['urlUpdateDNS'] = $CDWFunc->getUrl('domain', 'client', 'subaction=update-dns&id=' . $post->ID);
             $item['urlUpdateRecord'] = $CDWFunc->getUrl('domain', 'client', 'subaction=update-record&id=' . $post->ID);

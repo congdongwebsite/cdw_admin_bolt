@@ -12,6 +12,7 @@ class UserAdmin
         check_ajax_referer('ajax-register-nonce', 'security');
         $email = sanitize_email($_POST['email']);
         $phone = sanitize_text_field($_POST['phone']);
+        $urlRedirect = sanitize_text_field($_POST['urlRedirect']);
         if ($this->func_check_customer($email, $phone)) {
             wp_send_json_error(['msg' => "Đã có khách hàng với email trên, liên hệ quản trị để tạo tài khoản"]);
         }
@@ -73,7 +74,7 @@ class UserAdmin
                 wp_send_json_error(['msg' => $user->get_error_message()]);
             }
         }
-        wp_send_json_success(['msg' => 'Đăng ký thành công']);
+        wp_send_json_success(['msg' => 'Đăng ký thành công','urlRedirect' => $urlRedirect ?? home_url()]);
 
         wp_die();
     }
@@ -150,6 +151,7 @@ class UserAdmin
     {
         global $CDWFunc;
         check_ajax_referer('ajax-login-nonce', 'security');
+        $urlRedirect = sanitize_text_field($_POST['urlRedirect']);
         $creds = array(
             'user_login'    => $_POST['username'],
             'user_password' => $_POST['password'],
@@ -157,22 +159,23 @@ class UserAdmin
         );
 
         $user = wp_signon($creds, true);
+
+        if (is_wp_error($user)) {
+            wp_send_json_error(['msg' => $user->get_error_message()]);
+        }
+
         $customer_id =  get_user_meta($user->ID, 'customer-id', true);
 
         if (empty($customer_id) && !$CDWFunc->isAdministrator($user->ID)) {
             wp_send_json_error(['msg' => 'Tài khoản chưa tạo khách hàng vui lòng liên hệ quản trị viên']);
         }
-        if (is_wp_error($user)) {
-            wp_send_json_error(['msg' => $user->get_error_message()]);
-        }
-
         wp_clear_auth_cookie();
 
         wp_set_current_user($user->ID, $user->user_login);
         wp_set_auth_cookie($user->ID);
         do_action('wp_login', $user->user_login, $user);
 
-        wp_send_json_success(['id' => $user->ID, 'username' => $user->user_login]);
+        wp_send_json_success(['msg' => 'Đăng nhập thành công','urlRedirect' => $urlRedirect ?? home_url()]);
 
         wp_die();
     }

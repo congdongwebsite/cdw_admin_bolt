@@ -43,8 +43,13 @@ $(function () {
     const form = $('#license-form');
     const formTitle = $('#license-form-title');
     const licenseIdField = $('#license_id');
-    const moduleIdField = $('#module_id');
+    const pluginIdField = $('#plugin_id');
     const versionDetailIdField = $('#version_detail_id');
+    const customerIdField = $('#customer_id');
+
+    if (typeof initSelect2Customer === "function") {
+        initSelect2Customer('customer_id', form);
+    }
 
     function sendRequest(action, data = {}) {
         const postData = {
@@ -56,25 +61,25 @@ $(function () {
         return $.post(objAdmin.ajax_url, postData);
     }
 
-    function loadVersionDetails(moduleId, selectedVersionDetailId = null) {
+    function loadVersionDetails(pluginId, selectedVersionDetailId = null) {
         versionDetailIdField.empty().append('<option value="">Chọn phiên bản</option>');
-        if (!moduleId) {
+        if (!pluginId) {
             return;
         }
 
-        sendRequest('get_version_details_by_module', { module_id: moduleId }).done(function(response) {
+        sendRequest('get_version_details_by_plugin', { plugin_id: pluginId }).done(function (response) {
             if (response.success) {
-                response.data.forEach(function(versionDetail) {
+                response.data.forEach(function (versionDetail) {
                     const option = `<option value="${versionDetail.id}">${versionDetail.version} (${versionDetail.date})</option>`;
                     versionDetailIdField.append(option);
                 });
                 if (selectedVersionDetailId) {
-                    versionDetailIdField.val(selectedVersionDetailId);
+                    versionDetailIdField.val(selectedVersionDetailId).trigger('change');
                 }
             } else {
                 console.error('Error loading version details:', response.data.msg);
             }
-        }).fail(function() {
+        }).fail(function () {
             console.error('AJAX error loading version details.');
         });
     }
@@ -82,25 +87,25 @@ $(function () {
     function loadLicenses() {
         tableBody.html('<tr><td colspan="8">Đang tải...</td></tr>');
 
-        sendRequest('get_licenses').done(function(response) {
+        sendRequest('get_licenses').done(function (response) {
             if (response.success) {
                 tableBody.empty();
-                response.data.forEach(function(license) {
+                response.data.forEach(function (license) {
                     const row = `
                         <tr data-id="${license.id}">
                             <td>${license.title}</td>
                             <td>${license.key}</td>
+                            <td>${license.customer_name}</td>
                             <td>${license.plugin_name}</td>
-                            <td>${license.module_name}</td>
                             <td>${license.type === 'free' ? 'Miễn phí' : 'Trả phí'}</td>
                             <td>${license.starts_at}</td>
                             <td>${license.expires_at}</td>
                             <td class="status">${license.status === 'active' ? 'Kích hoạt' : 'Vô hiệu hóa'}</td>
                             <td>${license.version}</td>
                             <td class="actions">
-                                ${license.status === 'active' 
-                                    ? `<button class="btn btn-sm btn-warning deactivate-license">Vô hiệu hóa</button>` 
-                                    : `<button class="btn btn-sm btn-success activate-license">Kích hoạt</button>`}
+                                ${license.status === 'active'
+                            ? `<button class="btn btn-sm btn-warning deactivate-license">Vô hiệu hóa</button>`
+                            : `<button class="btn btn-sm btn-success activate-license">Kích hoạt</button>`}
                                 <button class="btn btn-sm btn-primary edit-license">Sửa</button>
                                 <button class="btn btn-sm btn-info renew-license">Gia hạn</button>
                                 <button class="btn btn-sm btn-danger delete-license">Xóa</button>
@@ -112,7 +117,7 @@ $(function () {
             } else {
                 tableBody.html('<tr><td colspan="8">Không thể tải danh sách giấy phép.</td></tr>');
             }
-        }).fail(function() {
+        }).fail(function () {
             tableBody.html('<tr><td colspan="8">Đã xảy ra lỗi.</td></tr>');
         });
     }
@@ -122,15 +127,16 @@ $(function () {
         licenseIdField.val('');
         formTitle.text('Thêm mới Giấy phép');
         $('#starts_at').val(new Date().toISOString().split('T')[0]);
-        moduleIdField.val(''); // Clear module selection
-        versionDetailIdField.empty().append('<option value="">Chọn phiên bản</option>'); // Clear version details
+        pluginIdField.val('').trigger('change');
+        versionDetailIdField.empty().append('<option value="">Chọn phiên bản</option>');
+        customerIdField.val(null).trigger('change');
     }
 
-    tableBody.on('click', '.view-license', function() {
+    tableBody.on('click', '.view-license', function () {
         const row = $(this).closest('tr');
         const licenseKey = row.find('td:nth-child(2)').text();
-        
-        sendRequest('get_licenses').done(function(response) {
+
+        sendRequest('get_licenses').done(function (response) {
             if (response.success) {
                 const license = response.data.find(l => l.key === licenseKey);
                 if (license) {
@@ -141,44 +147,44 @@ $(function () {
             }
         });
     });
-    
-    tableBody.on('click', '.delete-license', function() {
+
+    tableBody.on('click', '.delete-license', function () {
         if (!confirm('Bạn có chắc chắn muốn xóa?')) return;
         const row = $(this).closest('tr');
         const licenseId = row.data('id');
-        sendRequest('delete', { license_id: licenseId }).done(function(response) {
+        sendRequest('delete', { license_id: licenseId }).done(function (response) {
             if (response.success) {
                 row.remove();
             }
         });
     });
 
-    tableBody.on('click', '.activate-license, .deactivate-license', function() {
+    tableBody.on('click', '.activate-license, .deactivate-license', function () {
         const button = $(this);
         const row = button.closest('tr');
         const licenseId = row.data('id');
         const action = button.hasClass('activate-license') ? 'activate' : 'deactivate';
-        
-        sendRequest(action, { license_id: licenseId }).done(function(response) {
+
+        sendRequest(action, { license_id: licenseId }).done(function (response) {
             if (response.success) {
                 loadLicenses();
             }
         });
     });
 
-    tableBody.on('click', '.renew-license', function() {
+    tableBody.on('click', '.renew-license', function () {
         const row = $(this).closest('tr');
         const licenseId = row.data('id');
-        sendRequest('renew', { license_id: licenseId }).done(function(response) {
+        sendRequest('renew', { license_id: licenseId }).done(function (response) {
             if (response.success) {
                 loadLicenses();
             }
         });
     });
 
-    tableBody.on('click', '.edit-license', function() {
+    tableBody.on('click', '.edit-license', function () {
         const licenseId = $(this).closest('tr').data('id');
-        sendRequest('get_details', { license_id: licenseId }).done(function(response) {
+        sendRequest('get_details', { license_id: licenseId }).done(function (response) {
             if (response.success) {
                 const license = response.data;
                 formTitle.text('Sửa Giấy phép');
@@ -188,25 +194,27 @@ $(function () {
                 $('#license_type').val(license.type);
                 $('#starts_at').val(license.starts_at);
                 $('#status').val(license.status);
-                $('#duration').val('1 year'); 
-                $('#version').val(license.version);
-
-                // Set module and load version details
-                if (license.module_id) {
-                    moduleIdField.val(license.module_id);
-                    loadVersionDetails(license.module_id, license.version);
+                $('#duration').val(license.duration);
+                $('#version').val(license.version_id);
+                if (license.customer_id) {
+                    customerIdField.val(license.customer_id).trigger('change');
+                } else {
+                    customerIdField.val(null).trigger('change');
+                }
+                if (license.plugin_id) {
+                    loadVersionDetails(license.plugin_id, license.version_id);
                 }
             }
         });
     });
 
     // Event listener for module selection change
-    moduleIdField.on('change', function() {
-        const selectedModuleId = $(this).val();
-        loadVersionDetails(selectedModuleId);
+    pluginIdField.on('change', function () {
+        const selectedPluginId = $(this).val();
+        loadVersionDetails(selectedPluginId);
     });
 
-    form.on('submit', function(e) {
+    form.on('submit', function (e) {
         e.preventDefault();
         const submitButton = $(this).find('button[type="submit"]');
         submitButton.prop('disabled', true).text('Đang lưu...');
@@ -215,18 +223,18 @@ $(function () {
             obj[item.name] = item.value;
             return obj;
         }, {});
-        
-        sendRequest('save', formData).done(function(response) {
+
+        sendRequest('save', formData).done(function (response) {
             if (response.success) {
                 resetForm();
                 loadLicenses();
             }
-        }).always(function() {
+        }).always(function () {
             submitButton.prop('disabled', false).text('Lưu Giấy phép');
         });
     });
 
-    $('#clear-form').on('click', function() {
+    $('#clear-form').on('click', function () {
         resetForm();
     });
 
@@ -235,7 +243,7 @@ $(function () {
     }
 
     // If a module is pre-selected (e.g., on page load for edit form), load its versions
-    if (moduleIdField.val()) {
-        loadVersionDetails(moduleIdField.val());
+    if (pluginIdField.val()) {
+        loadVersionDetails(pluginIdField.val());
     }
 });

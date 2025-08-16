@@ -57,7 +57,7 @@ class DateTimeHandler
             $dateTime = $dateTimeString;
         else
             $dateTime = DateTime::createFromFormat($formatFrom, $dateTimeString);
-        return $dateTime->setTime(0, 0, 0)->format($formatTo);
+        return $dateTime->format($formatTo);
     }
     public function convertDateTimeDisplay($dateTimeString, $formatFrom = null, $formatTo = null)
     {
@@ -71,7 +71,21 @@ class DateTimeHandler
         else
             $dateTime = DateTime::createFromFormat($formatFrom, $dateTimeString);
 
-        return $dateTime->setTime(0, 0, 0)->format($formatTo);
+        return $dateTime->format($formatTo);
+    }
+    public function convertDateTimeBillingDisplay($dateTimeString, $formatFrom = null, $formatTo = null)
+    {
+        $formatFrom = $formatFrom ?? $this->formatTo;
+        $formatTo = $formatTo ?? $this->formatFrom;
+
+        if (!$this->isValidDateFormat($dateTimeString, $formatFrom)) return $dateTimeString;
+
+        if ($dateTimeString instanceof DateTime)
+            $dateTime = $dateTimeString;
+        else
+            $dateTime = DateTime::createFromFormat($formatFrom, $dateTimeString);
+
+        return $dateTime->format($this->formatDB);
     }
 
     public function addDays($dateTimeString, $days, $formatFrom = null, $formatTo = null)

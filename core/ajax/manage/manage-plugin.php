@@ -59,6 +59,8 @@ class AjaxManagePlugin
             $name = get_post_meta($post->ID, 'name', true);
             $sub_domain = get_post_meta($post->ID, 'sub_domain', true);
             $price = get_post_meta($post->ID, 'price', true);
+            $module_version = get_post_meta($post->ID, 'module_id', true);
+            $module_version_name = get_post_meta($module_version, 'name', true);
             $type = wp_get_post_terms($post->ID, 'plugin-type', array('fields' => 'names'));;
 
             $thumbnail_id = get_post_thumbnail_id($post->ID);
@@ -69,6 +71,8 @@ class AjaxManagePlugin
                 'id' => $id,
                 'image' => !$image ? '' : $image,
                 'title' => $title,
+                'module_version' => $module_version,
+                'module_version_name' => $module_version_name,
                 'name' => $name,
                 'type' => implode(",", $type),
                 'url' => $sub_domain,
@@ -112,10 +116,12 @@ class AjaxManagePlugin
             $name = isset($_POST['name']) ? $_POST['name'] : '';
             $sub_domain = isset($_POST['sub_domain']) ? $_POST['sub_domain'] : '';
             $price = isset($_POST['price']) ? $_POST['price'] : '';
+            $module_version = isset($_POST['module_version']) ? $_POST['module_version'] : '';
 
             add_post_meta($id, 'name', $name);
             add_post_meta($id, 'sub_domain', $sub_domain);
             add_post_meta($id, 'price', $price);
+            add_post_meta($id, 'module_id', $module_version);
             wp_set_post_terms($id,  $type, 'plugin-type');
 
             wp_send_json_success(['msg' => 'Tạo thành công', 'id' => $id]);
@@ -263,10 +269,12 @@ class AjaxManagePlugin
             $name = isset($_POST['name']) ? $_POST['name'] : '';
             $sub_domain = isset($_POST['sub_domain']) ? $_POST['sub_domain'] : '';
             $price = isset($_POST['price']) ? $_POST['price'] : '';
+            $module_version = isset($_POST['module_version']) ? $_POST['module_version'] : '';
 
             update_post_meta($id, 'name', $name);
             update_post_meta($id, 'sub_domain', $sub_domain);
             update_post_meta($id, 'price', $price);
+            update_post_meta($id, 'module_id', $module_version);
             wp_set_post_terms($id,  $type, 'plugin-type');
 
             wp_send_json_success(['msg' => 'Lưu thành công', 'id' => $id]);

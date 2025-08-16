@@ -33,33 +33,99 @@ var plugin = (function (self, base) {
         self.byPlugin();
       },
     },
+    {
+      text: '<i class="fa fa-shopping-cart" aria-hidden="true"></i> <span>Gia Hạn</pan>',
+      className: "btn-warning",
+      action: function (e, dt, node, config) {
+        self.addToCart();
+      },
+    },
   ];
   self.byPlugin = (e) => {
     window.location.href = $("#url-choose").val();
   };
 
+  self.addToCart = (e) => {
+    let data = base.getSelectedRows();
+    if (data.length == 0) {
+      Swal.fire({
+        title: "Vui lòng chọn plugin muốn gia hạn!",
+        text: "Vui lòng chọn plugin!",
+        icon: "warning",
+      });
+      return;
+    }
+    ids = [];
+
+    data.map((row, index) => {
+      ids = [...ids, row.id];
+    });
+
+    Swal.fire({
+      title: "Gia hạn plugin",
+      text: "Bạn có chắc muốn gia hạn cho các plugin vừa chọn?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Có",
+      cancelButtonText: "Không",
+    }).then((res) => {
+      if (res.value) {
+        callAjaxLoading(
+          {
+            ids: ids,
+            action: "ajax_add-plugin-client-cart",
+            security: $("#index-nonce").val(),
+          },
+          (res) => {
+            if (res.success) {
+              $(".top-navbar-cart").trigger("update-cart");
+              Swal.fire({
+                title: "Thêm vào giỏ hàng thành công",
+                text: "Bạn muốn mở giỏ hàng?",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Có",
+                cancelButtonText: "Không",
+              }).then((res2) => {
+                if (res2.value) {
+                  window.location.href = res.data.cart_url;
+                }
+              });
+            } else {
+              showErrorMessage(res.data.msg, "Có lỗi xảy ra!");
+            }
+          },
+          (msg) => {
+            showErrorMessage(msg);
+          }
+        );
+      }
+    });
+  };
   base.column = [
-    { data: "date", title: "Date" },
+    { data: "date", title: "Ngày mua" },
+    { data: "expiry_date", title: "Hết hạn" },
     { data: "image", title: "Ảnh" },
     { data: "title", title: "Tiêu đề" },
+    { data: "license", title: "Giấy phép" },
     { data: "info", title: "Thông tin" },
     { data: "price", title: "Giá" },
   ];
   base.columnDefs = [
     {
-      targets: 0,
+      targets: [0,1],
       render: dateFormatter,
     },
     {
       targets: 2,
-      render: drillDownFormatter,
+      // render: drillDownFormatter,
     },
     {
-      targets: 1,
+      targets: 2,
       render: imageFormatter,
     },
     {
-      targets: 4,
+      targets: 6,
       render: numberFormatterAmountVND,
     },
   ];

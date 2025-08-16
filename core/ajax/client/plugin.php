@@ -107,7 +107,9 @@ class AjaxClientPlugin
             $title = get_the_title($plugin_type);
             $info = get_post_meta($post->ID, 'name', true);
             $price = get_post_meta($post->ID, 'price', true);
+            $license = get_post_meta($post->ID, 'license', true);
             $date = get_post_meta($post->ID, 'date', true);
+            $expiry_date = get_post_meta($post->ID, 'expiry_date', true);
 
             $thumbnail_id = get_post_thumbnail_id($plugin_type);
             $image =  wp_get_attachment_url($thumbnail_id);
@@ -118,6 +120,8 @@ class AjaxClientPlugin
             $item['title'] = !$title ? '' : $title;
             $item['info'] = $info;
             $item['date'] = $date;
+            $item['expiry_date'] = $expiry_date;
+            $item['license'] = $license;
             $item['price'] = $price;
 
             $data[] = $item;

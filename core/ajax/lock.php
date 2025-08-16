@@ -66,7 +66,7 @@ class AjaxAdmin
         // First check the nonce, if it fails the function will break
         check_ajax_referer('ajax-login-nonce', 'security');
         $CDWRecaptcha->checkPost('login');
-
+        $urlredirect = isset($_POST['urlredirect']) ? $_POST['urlredirect'] : "";
         $security = $_POST['security'];
         $Encryption = new Encryption();
         $password = $Encryption->decrypt($_POST['signin-password'], $security);
@@ -78,16 +78,16 @@ class AjaxAdmin
         );
         $user = wp_signon($creds, true);
 
+        if (is_wp_error($user)) {
+            wp_send_json_error(['msg' => $user->get_error_message()]);
+        }
+
         $customer_id = get_user_meta($user->ID, 'customer-id',  true);
         if (empty($customer_id) && !$CDWFunc->isAdministrator($user->ID)) {
 
             wp_send_json_error(['msg' => 'Tài khoản chưa tạo khách hàng vui lòng liên hệ quản trị viên']);
         }
-        if (is_wp_error($user)) {
-            wp_send_json_error(['msg' => $user->get_error_message()]);
-        }
-
-        wp_send_json_success(['user' => $user->ID, 'urlredirect' => '/admin/?module=profile&action=index']);
+        wp_send_json_success(['user' => $user->ID, 'urlredirect' => $urlredirect ?? '/admin/?module=profile&action=index']);
 
         wp_die();
     }

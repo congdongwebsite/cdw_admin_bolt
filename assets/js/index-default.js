@@ -1,7 +1,7 @@
 var indexDefault = (function (self) {
   self.counter = 0;
   self.intervalId;
-
+  self.init = true;
   self.notificationItemDelete = (e) => {
     e.preventDefault();
     let id_notification = $(e.currentTarget).data().idNotification;
@@ -360,6 +360,10 @@ var indexDefault = (function (self) {
         },
         (res) => {
           if (res.success) {
+            if (res.data.id && !self.init) {
+              window.location.reload();
+            }
+            self.init = false;
           } else {
             showErrorMessage(res.data.msg, "Có lỗi xảy ra!");
           }

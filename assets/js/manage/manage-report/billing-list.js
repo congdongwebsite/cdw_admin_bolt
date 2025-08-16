@@ -56,7 +56,7 @@ var reportBillingList = (function (self, base) {
     },
     {
       targets: 3,
-      render: dateFormatter,
+      render: dateBillingFormatter,
     },
     {
       targets: 5,

@@ -43,7 +43,7 @@ if ($tax->has) {
                                         ?>
                                     </div>
                                     <div class="col-md-4 col-sm-4 col-4 text-right">
-                                        <p class="mb-0"><strong>Ngày thanh toán: </strong><?php echo $CDWFunc->date->getCurrentDateTime('d/m/Y'); ?></p>
+                                        <p class="mb-0"><strong>Ngày thanh toán: </strong><?php echo $CDWFunc->date->getCurrentDateTime('Y-m-d H:i:s'); ?></p>
                                         <p class="mb-0"><strong>Trạng thái: </strong> <span class="badge  badge-warning mb-0">Khởi tạo</span></p>
                                     </div>
                                 </div>

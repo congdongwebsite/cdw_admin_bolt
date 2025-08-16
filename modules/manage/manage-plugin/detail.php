@@ -39,7 +39,13 @@ if (isset($_GET['id']) && get_post_status($_GET['id'])) {
                                 </div>
                             </div>
 
-                            <div class="col-lg-12 col-md-12 col-sm-12 col-12">
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-12">
+                                <div class="form-group">
+                                    <label for="module-version" class="control-label">Module Version</label>
+                                    <select id='module-version' name='module-version' class='select2 form-control' data-value="<?php echo get_post_meta($id_detail, 'module_id', true); ?>" required></select>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-12">
                                 <div class="form-group">
                                     <label for="type" class="control-label">Loại</label>
                                     <?php

@@ -25,7 +25,10 @@ switch (strtolower(MODULE_ADMIN)) {
         switch (strtolower(ACTION_ADMIN)) {
             case 'index':
                 if (!is_user_logged_in()) {
-                    header('Location: ' . $CDWFunc->getUrl('login', 'lock'));
+                    $url = $CDWFunc->getUrl('login', 'lock');
+                    if (isset($_GET['urlredirect']) && $_GET['urlredirect'] != '')
+                        $url .= '&urlredirect=' . urlencode($_GET['urlredirect']);
+                    header('Location: ' .  $url);
                 } else {
                     $functionLock->lock();
                 }
@@ -53,10 +56,15 @@ switch (strtolower(MODULE_ADMIN)) {
         break;
     default:
         if (!is_user_logged_in()) {
-            header('Location: ' . $CDWFunc->getUrl('login', 'lock'));
+            $url = $CDWFunc->getUrl('login', 'lock');
+            if (isset($_GET['urlredirect']) && $_GET['urlredirect'] != '')
+                $url .= '&urlredirect=' . urlencode($_GET['urlredirect']);
+            header('Location: ' .  $url);
         } else {
             if ($functionLock->getLock())
                 header('Location: ' . $CDWFunc->getUrl('index', 'lock'));
+            if (isset($_GET['urlredirect']) && $_GET['urlredirect'] != '')
+                header('Location: ' . $_GET['urlredirect']);
         }
 
         if ($module_exists) {

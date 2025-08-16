@@ -18,7 +18,7 @@ var manageHosting = (function (self, base) {
   ];
   base.columnDefs = [
     {
-      targets: 1,
+      targets: 0,
       render: drillDownFormatter,
     },
     {

@@ -499,6 +499,16 @@ function dateFormatter(data, type, row, meta) {
       : date.format(siteSettings.formatDate)
     : data;
 }
+function dateBillingFormatter(data, type, row, meta) {
+  if (!data) return data;
+console.log('siteSettings.formatDateBilling || siteSettings.formatDate',siteSettings.formatDateBilling, siteSettings.formatDate)
+  let date = moment(data, dateFormat);
+  return date.isValid()
+    ? date.year() === 1900
+      ? ""
+      : date.format(siteSettings.formatDateBilling || siteSettings.formatDate)
+    : data;
+}
 function timeFormatter(data, type, row, meta) {
   if (!data) return data;
 

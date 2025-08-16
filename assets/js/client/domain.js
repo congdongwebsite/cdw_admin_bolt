@@ -118,7 +118,8 @@ var mdomain = (function (self, base) {
     // { data: "buy_date", title: "Thời gian mua" },
     // { data: "expiry_date", title: "Thời gian hết hạn" },
     //{ data: "url_dns", title: "URL DNS" },
-    { data: "ip", title: "IP" },
+    // { data: "ip", title: "IP" },
+    { data: "customer", title: "Khách hàng" },
     { data: "action", title: "Hành động" },
   ];
   base.columnDefs = [
@@ -134,6 +135,10 @@ var mdomain = (function (self, base) {
     //   targets: [3, 4],
     //   render: dateFormatter,
     // },
+    {
+      targets: -2,
+      render: drillDownFormatter,
+    },
     {
       targets: -1,
       render: actionDomainFormatter,

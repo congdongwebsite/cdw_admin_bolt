@@ -19,6 +19,7 @@ var detailManagePlugin = (function (self, base) {
     var form_data = getFormData(base.action, base.security, base.form);
     form_data["price"] = Price.getNumber();
     form_data["type"] = $("#type", base.form).val();
+    form_data["module_version"] = $("#module-version", base.form).val();
     showLoading(
       $.ajax({
         type: "POST",
@@ -295,6 +296,7 @@ var detailManagePlugin = (function (self, base) {
     );
 
     initSelect2PluginType("type", base.form);
+    initSelect2ModuleVersion("module-version", base.form);
     imagesContainer.lightGallery({
       thumbnail: true,
       selector: ".item a.image",

@@ -79,10 +79,10 @@ class FunctionCart
         $tax =  get_user_meta(get_current_user_id(), $this->key . '_tax', true);
 
         return (object) [
-            "has" => $tax['has'],
-            "company" => $tax['company'],
-            "code" => $tax['code'],
-            "email" => $tax['email'],
+            "has" => $tax['has'] ?? false,
+            "company" => $tax['company'] ?? "",
+            "code" => $tax['code'] ?? "",
+            "email" => $tax['email'] ?? "",
         ];
     }
     public function setNote($note = "")

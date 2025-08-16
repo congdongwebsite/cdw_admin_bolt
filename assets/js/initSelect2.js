@@ -98,6 +98,9 @@ function initSelect2Sites(id, context) {
 function initSelect2PluginType(id, context) {
   initSelect2Searching(id, context, "ajax_plugin-types");
 }
+function initSelect2ModuleVersion(id, context) {
+  initSelect2Searching(id, context, "ajax_module-versions");
+}
 function initSelect2Plugins(id, context) {
   initSelect2Searching(id, context, "ajax_plugins");
 }

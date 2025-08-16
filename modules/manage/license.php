@@ -9,8 +9,8 @@
                         <tr>
                             <th>Tiêu đề</th>
                             <th>Mã giấy phép</th>
+                            <th>Khách hàng</th>
                             <th>Plugin</th>
-                            <th>Module</th>
                             <th>Loại</th>
                             <th>Ngày bắt đầu</th>
                             <th>Ngày hết hạn</th>
@@ -43,6 +43,7 @@
                             <select id="plugin_id" name="plugin_id" class="form-control" required>
                                 <?php
                                 $plugins = get_posts(array('post_type' => 'plugin', 'posts_per_page' => -1));
+                                echo '<option value="">Chọn Plugin</option>';
                                 foreach ($plugins as $plugin) {
                                     echo '<option value="' . esc_attr($plugin->ID) . '">' . esc_html($plugin->post_title) . '</option>';
                                 }
@@ -50,31 +51,8 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="module_id">Module</label>
-                            <select id="module_id" name="module_id" class="form-control" required>
-                                <option value="">Chọn Module</option>
-                                <?php
-                                $version_modules = get_posts(array(
-                                    'post_type' => 'version',
-                                    'post_status' => 'publish',
-                                    'posts_per_page' => -1,
-                                    'meta_query' => array(
-                                        array(
-                                            'key' => 'type',
-                                            'value' => 'plugin',
-                                            'compare' => '=',
-                                        ),
-                                    ),
-                                    'orderby' => 'title',
-                                    'order' => 'ASC',
-                                ));
-
-                                foreach ($version_modules as $module) {
-                                    $module_name = get_post_meta($module->ID, 'name', true);
-                                    echo '<option value="' . esc_attr($module->ID) . '">' . esc_html($module_name) . '</option>';
-                                }
-                                ?>
-                            </select>
+                            <label for="customer_id">Khách hàng</label>
+                            <select id='customer_id' name='customer_id' class='select2 form-control'></select>
                         </div>
                         <div class="form-group">
                             <label for="version_detail_id">Phiên bản</label>

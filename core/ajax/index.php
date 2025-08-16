@@ -876,17 +876,22 @@ class IndexAdmin
         global $CDWFunc;
         // First check the nonce, if it fails the function will break
         check_ajax_referer('ajax-index-nonce', 'security');
-
         if ($CDWFunc->isAdministrator()) {
-            $id = isset($_POST['id']) ? $_POST['id'] : "";
-            if (empty($id))
-                wp_send_json_error(['msg' => 'Đổi khách hàng không thành công']);
-
             $userID = wp_get_current_user()->ID;
-            update_user_meta($userID, 'customer-id',  $id);
+            $id = isset($_POST['id']) ? $_POST['id'] : "";
+            if (empty($id) || !is_numeric($id)) {
+                delete_user_meta($userID, 'customer-default-id',  $id);
+            } else {
+                if(!get_post_status($id)){
+                    wp_send_json_success(['msg' => 'Không tìm thấy khách hàng yêu cầu']);
+                }
+                update_user_meta($userID, 'customer-default-id',  $id);
+            }
+            wp_send_json_success(['msg' => 'Đổi khách hàng thành công', 'id' => $id]);
+        } else {
+            wp_send_json_error(['msg' => 'Bạn không có quyền']);
         }
 
-        wp_send_json_success(['msg' => 'Đổi khách hàng thành công']);
         wp_send_json_error(['msg' => 'Lỗi']);
         wp_die();
     }

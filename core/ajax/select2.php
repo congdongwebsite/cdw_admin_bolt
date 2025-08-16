@@ -21,6 +21,7 @@ class Select2
         add_action('wp_ajax_ajax_hosting-feature',  array($this, 'func_get_hosting_feature'));
         add_action('wp_ajax_ajax_customer',  array($this, 'func_get_customers'));
         add_action('wp_ajax_ajax_plugin-types',  array($this, 'func_get_plugin_types'));
+        add_action('wp_ajax_ajax_module-versions',  array($this, 'func_get_module_versions'));
         add_action('wp_ajax_ajax_plugins',  array($this, 'func_get_plugins'));
         add_action('wp_ajax_ajax_emails',  array($this, 'func_get_emails'));
         add_action('wp_ajax_ajax_version-type',  array($this, 'func_get_version_type'));
@@ -450,6 +451,37 @@ class Select2
 
         wp_die();
     }
+    public function func_get_module_versions()
+{
+    $result = [];
+    $search = $_GET['search'];
+
+    $args = array(
+        'post_type'      => 'version',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+        'fields'         => 'ids',
+    );
+
+    if (!empty($search)) {
+        $args['s'] = $search;
+    }
+
+    $ids = get_posts($args);
+
+    foreach ($ids as $id) {
+        $item = [];
+        $item['id'] = $id;
+        $item['text'] = get_the_title($id);
+        $result[] = $item;
+    }
+
+    wp_send_json_success($result);
+
+    wp_die();
+}
 
     public function func_get_plugins()
     {

@@ -2,11 +2,9 @@
 defined('ABSPATH') || exit;
 class MenuAdmin
 {
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
-    public function getItemMenu($data)
+    public function getItemMenu($data, $hasActiveMenu = false)
     {
         global $CDWFunc;
         if (isset($data->show) && $data->show && $this->checkPermission($data)) {
@@ -21,7 +19,7 @@ class MenuAdmin
                 }
             ob_start();
 ?>
-            <li class="<?php echo $current->activeAction && $current->activeModule ? 'active ' : ' ';
+            <li class="<?php echo !$hasActiveMenu && $current->activeAction && $current->activeModule ? 'active ' : ' ';
                         echo  $hasarrow > 0 ? "has-child" : ""; ?>">
                 <a href="<?php echo $CDWFunc->getUrl($data->action, $data->module); ?>" class="<?php echo  $hasarrow > 0 ? "has-arrow" : ""; ?>"><i class="<?php echo $data->icon; ?>"></i>
                     <?php
@@ -35,7 +33,9 @@ class MenuAdmin
                     echo '<ul>';
                     foreach ($data->items as $item) {
                         if (!$data->show) continue;
-                        echo $this->getItemMenu($item);
+                        $menu = $this->getItemMenu($item, $hasActiveMenu);
+                        $hasActiveMenu = $hasActiveMenu || $menu['hasActiveMenu'];
+                        echo $menu['html'];
                     }
                     echo '</ul>';
                 }
@@ -44,9 +44,10 @@ class MenuAdmin
 
 <?php
             $obj = ob_get_clean();
-            return  $obj;
+            $hasActiveMenu = $hasActiveMenu || $current->activeAction && $current->activeModule;
+            return  ['html' => $obj, 'hasActiveMenu' => $hasActiveMenu];
         } else
-            return '';
+            return  ['html' => '', 'hasActiveMenu' => false];
     }
     public function checkItemActive($data)
     {

@@ -179,7 +179,7 @@ class FunctionEmail
         return $this->sendHtmlEmail($user_data->email, $subject, $htmlBody, $user_data->name);
     }
 
-    public function sendEmailOrderComplete($order_id)
+    public function sendEmailOrderComplete($order_id,$sendAdmin = false)
     {
         global $CDWFunc;
         $customer_id = get_post_meta($order_id, 'customer-id', true);
@@ -188,9 +188,14 @@ class FunctionEmail
         $email = get_post_meta($customer_id, 'email', true);
         $name = get_post_meta($customer_id, 'name', true);
         $subject = "Đặt Đơn Hàng Thành Công #" . $order_id . " - Cộng Đồng Web";
+        $subjectAdmin = $name . " đặt Đơn Hàng Mới #" . $order_id . " - Cộng Đồng Web";
         $arg['order-id'] = $order_id;
         $arg['title'] = "ĐƠN ĐẶT HÀNG THÀNH CÔNG";
         $htmlBody =  $this->get_templete_email('order-complete', $arg);
+         if ($sendAdmin) {
+            $this->sendHtmlEmail(SMPT_USERNAME, $subjectAdmin, $htmlBody, 'Cộng Đồng Web');
+            $this->sendHtmlEmail(EMAIL_SUPPORT2, $subjectAdmin, $htmlBody, 'Cộng Đồng Web');
+        }
 
         return $this->sendHtmlEmail($email, $subject, $htmlBody, $name);
     }
@@ -216,6 +221,36 @@ class FunctionEmail
             $this->sendHtmlEmail(EMAIL_SUPPORT2, $subjectAdmin, $htmlBody, 'Cộng Đồng Web');
         }
 
+        return $this->sendHtmlEmail($email, $subject, $htmlBody, $name);
+    }
+    public function sendEmailLicense($plugin_id, $sendAdmin = false)
+    {
+        global $CDWFunc;
+        $plugin_name= get_post_meta($plugin_id, 'name', true);
+        $plugin_date = get_post_meta($plugin_id, 'date', true);
+        $plugin_type = get_post_meta($plugin_id, 'plugin-type', true);
+        $plugin_name = get_post_meta($plugin_type, 'name', true);
+        $plugin_expiry_date = get_post_meta($plugin_id, 'expiry_date', true);
+        $plugin_license = get_post_meta($plugin_id, 'license', true);
+
+        $customer_id = get_post_meta($plugin_id, 'customer-id', true);
+
+        $email = get_post_meta($customer_id, 'email', true);
+
+        $name = get_post_meta($customer_id, 'name', true);
+        $license_info = cdw_get_license_info($plugin_license, $plugin_type);
+        $subject = "Thông tin giấy phép plugin #" . $plugin_name . " - Cộng Đồng Web";
+        $arg['plugin-id'] = $plugin_id;
+        $arg['title'] = "Giấy phép Plugin " . $plugin_name;
+        $arg['plugin-name'] = $plugin_name;
+        $arg['plugin-date'] = $plugin_date;
+        $arg['plugin-type'] = $plugin_type;
+        $arg['plugin-expiry-date'] = $plugin_expiry_date;
+        $arg['plugin-license'] = $plugin_license;
+        $arg['plugin-url'] = $license_info['version_url'] . '?version=' . $license_info['version'];
+        $arg['customer-id'] = $customer_id;
+        
+        $htmlBody =  $this->get_templete_email('license-plugin', $arg);
         return $this->sendHtmlEmail($email, $subject, $htmlBody, $name);
     }
 
@@ -327,9 +362,9 @@ class FunctionEmail
     public function get_templete_email($filename, $arg)
     {
         ob_start();
-        require_once ADMIN_THEME_URL . '/templates/email/header.php';
-        require_once ADMIN_THEME_URL . '/templates/email/' . $filename . '.php';
-        require_once ADMIN_THEME_URL . '/templates/email/footer.php';
+        require ADMIN_THEME_URL . '/templates/email/header.php';
+        require ADMIN_THEME_URL . '/templates/email/' . $filename . '.php';
+        require ADMIN_THEME_URL . '/templates/email/footer.php';
         $data = ob_get_clean();
         return  $data;
     }

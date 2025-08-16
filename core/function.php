@@ -3,6 +3,7 @@ defined('ABSPATH') || exit;
 class FunctionAdmin // extends ConstantAdmin
 {
     private $menus;
+    private $module_menus;
     private $modules;
     private $dvhc;
     private $permission;
@@ -14,10 +15,20 @@ class FunctionAdmin // extends ConstantAdmin
     {
         date_default_timezone_set('Asia/Ho_Chi_Minh');
 
-        $menu_json = file_get_contents(ADMIN_THEME_URL . '/menu.json');
+        $module_menu_json = file_get_contents(ADMIN_THEME_URL . '/module-menu.json');
+        $userCurrent = wp_get_current_user();
+        foreach ($userCurrent->roles as $role) {
+            if (file_exists(ADMIN_THEME_URL . '/menu-' . $role . '.json')) {
+                $menu_json = file_get_contents(ADMIN_THEME_URL . '/menu-' . $role . '.json');
+            } else {
+                $menu_json = file_get_contents(ADMIN_THEME_URL . '/menu.json');
+            }
+        }
+
         $module_json = file_get_contents(ADMIN_THEME_URL . '/module.json');
         $permission_json = file_get_contents(ADMIN_THEME_URL . '/permission.json');
         $this->menus = json_decode($menu_json);
+        $this->module_menus = json_decode($module_menu_json);
         $this->modules = json_decode($module_json);
         $this->permission = json_decode($permission_json);
         $this->wpdb = new FunctionWPDB();
@@ -146,7 +157,7 @@ class FunctionAdmin // extends ConstantAdmin
     }
     public function getPathFileMenu($action, $module, $isPath = false, $modules = null)
     {
-        if ($modules == null)  $modules = $this->menus;
+        if ($modules == null)  $modules = $this->module_menus;
         $found = false;
         $fileName = '';
         if (sanitize_title($module) != '' && sanitize_title($action) != '') {
@@ -305,12 +316,12 @@ class FunctionAdmin // extends ConstantAdmin
     }
     public function getUrl($action, $module  = '', $parameter  = '')
     {
-        $url = '';
+        $url = URL_HOME;
         if ($module == '') $module = $action;
         if ($module != '')
-            $url =  "/" . URL_ADMIN . "/?module=" . $module . ($action != "" ? "&action=" . $action : "");
+            $url .=  "/" . URL_ADMIN . "/?module=" . $module . ($action != "" ? "&action=" . $action : "");
         else
-            $url =  "/" . URL_ADMIN;
+            $url .=  "/" . URL_ADMIN;
         if ($parameter != '')  $url .= '&' . $parameter;
         return  $url;
     }
@@ -358,8 +369,8 @@ class FunctionAdmin // extends ConstantAdmin
     public function checkPermission($action, $module)
     {
         global $userCurrent;
-        $isAdministrator = array_search("administrator", $userCurrent->roles, true) !== false;
-        if ($isAdministrator) return $isAdministrator;
+        // $isAdministrator = array_search("administrator", $userCurrent->roles, true) !== false;
+        // // if ($isAdministrator) return $isAdministrator;
         foreach ($userCurrent->roles as $role) {
             $data = array_column($this->permission, $role);
             if (count($data) > 0) {
@@ -390,9 +401,16 @@ class FunctionAdmin // extends ConstantAdmin
         if (empty($userID)) {
             $userID = wp_get_current_user()->ID;
         };
-        $customer_id = get_user_meta($userID, 'customer-id', true);
 
-        return $customer_id;
+        $userCurrent = get_user_by('id', $userID);
+
+        if (array_search("administrator", $userCurrent->roles, true) !== false) {
+            $customer_id = get_user_meta($userID, 'customer-default-id', true);
+        }
+        if (empty($customer_id)) {
+            $customer_id = get_user_meta($userID, 'customer-id', true);
+        }
+        return empty($customer_id) ? false : $customer_id;
     }
 
     public function redirectCustomerCheck($customerID = '', $link, $userID = '')
@@ -865,4 +883,18 @@ add_action('template_redirect', function () {
 function get_private_image_link($attachment_id)
 {
     return home_url('/admin-image/' . intval($attachment_id));
+}
+
+function mask_license($license)
+{
+    $length = strlen($license);
+
+    if ($length >= 7) {
+        $firstThree = substr($license, 0, 3);
+        $lastFour = substr($license, -4);
+        $middleLength = $length - 7;
+        $mask = str_repeat('x', $middleLength);
+        return $firstThree . $mask . $lastFour;
+    }
+    return $license;
 }

@@ -53,7 +53,7 @@ if (isset($_GET['id'])) $step = 2;
                                         ?>
                                     </div>
                                     <div class="col-md-4 col-sm-4 col-4 text-right">
-                                        <p class="mb-0"><strong>Ngày thanh toán: </strong><?php echo $CDWFunc->date->convertDateTimeDisplay(get_post_meta($id, "date", true)); ?></p>
+                                        <p class="mb-0"><strong>Ngày thanh toán: </strong><?php echo $CDWFunc->date->convertDateTimeBillingDisplay(get_post_meta($id, "date", true)); ?></p>
                                         <p class="mb-0"><strong>Trạng thái: </strong> <span class="badge <?php echo $checkoutStatus == "success" ? "badge-success" : ($checkoutStatus == "cancel" ? "badge-danger" : "badge-warning"); ?> mb-0"><?php echo $CDWFunc->get_lable_status($checkoutStatus); ?></span></p>
                                         <p><strong>ID: </strong> #<?php echo $code; ?></p>
                                     </div>

@@ -195,7 +195,7 @@ class FunctionTicket
         return count($ids);
     }
 
-    public function getCountTicketTypes()
+    public function getCountTicketTypes($status = null)
     {
         $result = [];
         $arr = array(
@@ -205,6 +205,48 @@ class FunctionTicket
             'posts_per_page' => -1,
         );
 
+        if ($status != null) {
+            if ($status == 'important') {
+                $arr['meta_query'][] = array(
+                    'key'     => 'important',
+                    'value'   => true,
+                    'compare' => '='
+                );
+            } else {
+
+                if ($status == 'processing') {
+
+                    $arr['meta_query'][] = array(
+                        'key'     => 'read',
+                        'value'   => true,
+                        'compare' => '='
+                    );
+                    $arr['meta_query'][] = array(
+                        'key'     => 'status',
+                        'value'   => 'pending',
+                        'compare' => '='
+                    );
+                } else
+                if ($status == 'pending') {
+
+                    $arr['meta_query'][] = array(
+                        'key'     => 'read',
+                        'value'   => false,
+                        'compare' => '='
+                    );
+                    $arr['meta_query'][] = array(
+                        'key'     => 'status',
+                        'value'   => 'pending',
+                        'compare' => '='
+                    );
+                } else
+                    $arr['meta_query'][] = array(
+                        'key'     => 'status',
+                        'value'   => $status,
+                        'compare' => '='
+                    );
+            }
+        }
         $ids = get_posts($arr);
 
         foreach ($ids as $id) {

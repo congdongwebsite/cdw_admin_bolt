@@ -17,6 +17,12 @@
                                 <input type="text" id="date" name="date" class="form-control datepicker date-now">
                             </div>
                         </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6 col-6">
+                            <div class="form-group">
+                                <label for="expiry-date" class="control-label">Thời gian hết hạn</label>
+                                <input type="text" id="expiry-date" name="expiry-date" class="form-control datepicker date-now">
+                            </div>
+                        </div>
                         <div class="col-lg-6 col-md-4 col-sm-6 col-12">
                             <div class="form-group">
                                 <label for="plugin-type" class="control-label">Plugin</label>
@@ -29,10 +35,16 @@
                                 <input type="text" id="price" name="price" class="form-control" required>
                             </div>
                         </div>
-                        <div class="col-lg-6 col-md-6 col-sm-6 col-12">
+                        <div class="col-lg-9 col-md-6 col-sm-6 col-12">
                             <div class="form-group">
                                 <label for="name" class="control-label">Thông tin</label>
                                 <input type="text" id="name" name="name" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-12">
+                            <div class="form-group">
+                                <label for="license" class="control-label">Giấy phép</label>
+                                <input type="text" id="license" name="license" class="form-control" disabled required>
                             </div>
                         </div>
                     </div>

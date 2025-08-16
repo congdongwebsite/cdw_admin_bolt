@@ -339,17 +339,19 @@ var newCustomer = (function (
   plugins.formName = "#modal-add-plugin-form";
   plugins.column = [
     { data: "date", title: "Ngày mua" },
+    { data: "expiry_date", title: "Thời gian hết hạn" },
     { data: "plugin-type_label", title: "Plugin" },
     { data: "price", title: "Giá" },
+    { data: "license", title: "Giấy phép" },
     { data: "name", title: "Thông tin" },
   ];
   plugins.columnDefs = [
     {
-      targets: 2,
+      targets: 3,
       render: numberFormatterAmountVND,
     },
     {
-      targets: 0,
+      targets: [0,1],
       render: dateFormatter,
     },
   ];
@@ -364,7 +366,9 @@ var newCustomer = (function (
     return {
       id: data ? data.id : "",
       date: $("#date", plugins.modalName).val(),
+      expiry_date: $("#expiry-date", plugins.modalName).val(),
       name: $("#name", plugins.modalName).val(),
+      license: $("#license", plugins.modalName).val(),
       price: PricePlugin.getNumber(),
       "plugin-type": $("#plugin-type", plugins.modalName).val(),
       "plugin-type_label": $(
@@ -379,7 +383,12 @@ var newCustomer = (function (
       "update",
       model.date?.formatDate()
     );
+    $("#buy-date", plugins.modalName).datepicker(
+      "update",
+      model.buy_date?.formatDate()
+    );
     $("#name", plugins.modalName).val(model.name);
+    $("#license", plugins.modalName).val(model.license);
     $("#plugin-type", plugins.modalName)
       .val(model["plugin-type"])
       .trigger("change");
@@ -393,7 +402,9 @@ var newCustomer = (function (
       let item = {
         id: row.id,
         date: row.date,
+        expiry_date: row.expiry_date,
         name: row.name,
+        license: row.license,
         price: row.price,
         "plugin-type": row["plugin-type"],
         change: row.change,
@@ -731,6 +742,7 @@ var newCustomer = (function (
       initSelect2Domains("domain-type", domains.modalName);
       initSelect2Sites("site-type", themes.modalName);
       initSelect2Plugins("plugin-type", plugins.modalName);
+      initdatepickerlink("buy-date", "expiry-date", plugins.modalName);
       initdatepickerlink("buy-date", "expiry-date", emails.modalName);
       initSelect2BillingStatus("status", billings.modalName);
 

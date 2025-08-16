@@ -1,6 +1,7 @@
 <?php
 defined('ABSPATH') || exit;
 global $CDWFunc, $CDWNotification, $CDWEmail, $CDWTMPL, $moduleCurrent, $CDWConst, $blogInfo, $CDWCart, $CDWTicket, $CDWUser, $CDWRecaptcha, $CDWQRCode;
+define('URL_HOME', 'https://dev2.congdongweb.com');
 define('URL_ADMIN', 'admin');
 define('ADMIN_THEME_URL', get_stylesheet_directory() . '/templates/admin');
 define('ADMIN_THEME_URL_F', get_template_directory_uri() . '/templates/admin');
@@ -23,7 +24,7 @@ define('APIMOMOPUBLICKEY', "");
 define('APIMOMOLANG', "vi");
 define('APIMOMOTIMEOUT', 60);
 
-define('CDW_VERSION', "4.13");
+define('CDW_VERSION', "4.15");
 define('SERVER_IP', "139.99.37.67"); // Cũ 171.244.8.217
 define('SMPT_HOST', "mail.congdongweb.com");
 define('SMPT_PORT', "465");

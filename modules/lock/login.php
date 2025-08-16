@@ -9,7 +9,7 @@ global $CDWFunc, $CDWRecaptcha;
     <div class="body">
         <form class="form-auth-small" method="post">
             <?php wp_nonce_field('ajax-login-nonce', 'nf_login'); ?>
-            <input type="hidden" id="urlredirect" value="<?php echo $CDWFunc->getUrl('', ''); ?>">
+            <input type="hidden" id="urlredirect" name="urlredirect" value="<?php echo isset($_GET['urlredirect']) ? $_GET['urlredirect'] : $CDWFunc->getUrl('', ''); ?>">
             <div class="form-group">
                 <label for="signin-email" class="control-label sr-only">Tài khoản</label>
                 <input type="text" class="form-control" id="signin-email" name="signin-email" value="<?php echo isset($_GET['username']) ? $_GET['username'] : ""; ?>" placeholder="Email hoặc tên đăng nhập" required>

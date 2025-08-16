@@ -175,7 +175,7 @@ class AjaxCustomer
             //Plugin
             $plugins = isset($_POST['plugins']) ? $_POST['plugins'] : [];
             $pluginColumns = ['name', 'price', 'plugin-type'];
-            $pluginColumnDates = ['date'];
+            $pluginColumnDates = ['date', 'expiry_date'];
             $plugins =  $CDWFunc->wpdb->func_new_detail_post('customer-plugin', 'customer-id', $id, $plugins, $pluginColumns);
             $CDWFunc->wpdb->func_update_detail_post_type_date('customer-plugin', 'customer-id', $id, $plugins, $pluginColumnDates);
 
@@ -350,6 +350,12 @@ class AjaxCustomer
             update_post_meta($id, 'cmnd', $cmnd);
             update_post_meta($id, 'note', $note);
 
+            $user_id = get_post_meta($id, 'user-id', true);
+            update_user_meta($user_id, 'nickname', get_post_meta($id, 'name', true));
+            update_user_meta($user_id, 'first_name', get_post_meta($id, 'name', true));
+            update_user_meta($user_id, 'phone', get_post_meta($id, 'phone', true));
+            update_user_meta($user_id, 'address', get_post_meta($id, 'address', true));
+
             //Hosting
             $hostings = isset($_POST['hostings']) ? $_POST['hostings'] : [];
             $hostingColumns = ['ip', 'port', 'user', 'pass',  'type', 'price'];
@@ -394,7 +400,7 @@ class AjaxCustomer
             //Plugin
             $plugins = isset($_POST['plugins']) ? $_POST['plugins'] : [];
             $pluginColumns = ['name', 'price', 'plugin-type'];
-            $pluginColumnDates = ['date'];
+            $pluginColumnDates = ['date', 'expiry_date'];
             $plugins =  $CDWFunc->wpdb->func_update_detail_post('customer-plugin', 'customer-id', $id, $plugins, $pluginColumns);
             $CDWFunc->wpdb->func_update_detail_post_type_date('customer-plugin', 'customer-id', $id, $plugins, $pluginColumnDates);
 
@@ -415,8 +421,8 @@ class AjaxCustomer
                     $sended = get_post_meta($idBilling, "email-success-sended", true);
                     if ($status == "success" && !$sended) {
 
-                        //$CDWEmail->sendEmailOrderComplete($idBilling);
-                        // update_post_meta($idBilling, "email-success-sended", true);
+                        $CDWEmail->sendEmailOrderComplete($idBilling);
+                        update_post_meta($idBilling, "email-success-sended", true);
                     }
                 }
                 //Cập nhật thông tin theo hóa đơn
@@ -452,6 +458,17 @@ class AjaxCustomer
                                     $expiry_date_new = $CDWFunc->date->addYears($expiry_date, $item["quantity"], $CDWFunc->date->formatDB);
                                     update_post_meta($item["id"], 'expiry_date', $expiry_date_new);
 
+                                    break;
+
+                                case "customer-plugin":
+                                    $expiry_date = get_post_meta($item["id"], 'expiry_date', true);
+                                    $expiry_date_new = $CDWFunc->date->addYears($expiry_date, $item["quantity"], $CDWFunc->date->formatDB);
+                                    update_post_meta($item["id"], 'expiry_date', $expiry_date_new);
+                                    $license_code = get_post_meta($item["id"], 'license', true);
+                                    $license = get_license_by_code($license_code);
+                                    if (!empty($license)) {
+                                        update_post_meta($license->ID, '_expires_at', $expiry_date_new);
+                                    }
                                     break;
 
                                 case "manage-hosting":
@@ -536,7 +553,7 @@ class AjaxCustomer
                                     $quantity = (float)$item["quantity"];
                                     $themes = [
                                         [
-                                            'name' => $quantity . ' x ' . $item["service"],
+                                            'name' =>  $item["service"],
                                             'site-type' => empty($item["id"]) ? "" : $item["id"],
                                             'price' => (float) $item["price"],
                                             'date' => $buy_date
@@ -548,6 +565,30 @@ class AjaxCustomer
                                         $themeColumnDates = ['date'];
                                         $themes =  $CDWFunc->wpdb->func_new_detail_post('customer-theme', 'customer-id', $id, $themes, $themeColumns);
                                         $CDWFunc->wpdb->func_update_detail_post_type_date('customer-theme', 'customer-id', $id, $themes, $themeColumnDates);
+                                    }
+                                    break;
+                                case 'manage-plugin':
+                                    $buy_date =  $CDWFunc->date->getCurrentDateTime();
+                                    $quantity = (float)$item["quantity"];
+                                    $license_id = cdw_create_license($item["id"], 'premium', $quantity, 'active', '', '', '', $id);
+                                    $plugins = [
+                                        [
+                                            'name' =>  $item["service"],
+                                            'plugin-type' => empty($item["id"]) ? "" : $item["id"],
+                                            'price' => (float) $item["price"],
+                                            'date' => $buy_date,
+                                            'expiry_date' => $CDWFunc->date->addYears($buy_date, $quantity, "Y-m-d H:i:s"),
+                                            'license' => cdw_get_license_code($license_id)
+                                        ]
+                                    ];
+
+                                    if (is_array($plugins) && count($plugins) > 0) {
+                                        $pluginColumns = ['name', 'price', 'plugin-type', 'license'];
+                                        $pluginColumnDates = ['date', 'expiry_date'];
+                                        $plugins =  $CDWFunc->wpdb->func_new_detail_post('customer-plugin', 'customer-id', $id, $plugins, $pluginColumns);
+                                        $CDWFunc->wpdb->func_update_detail_post_type_date('customer-plugin', 'customer-id', $id, $plugins, $pluginColumnDates);
+
+                                        $CDWEmail->sendEmailLicense($plugins[0]['id'], true);
                                     }
                                     break;
                             }
@@ -910,7 +951,7 @@ class AjaxCustomer
             wp_send_json_error(['msg' => 'Không tìm thấy loại bài đăng: ' . $postType]);
         }
 
-        $columns = ['date', 'name', 'price', 'plugin-type'];
+        $columns = ['date', 'expiry_date', 'name', 'price', 'license', 'plugin-type'];
 
         $data =  $CDWFunc->wpdb->func_load_detail($postType, 'customer-id', $_POST['id'], $columns, 'date');
         foreach ($data as $key => $value) {
@@ -943,6 +984,7 @@ class AjaxCustomer
         $user = get_user_by('email', $email);
         if ($user) {
             wp_set_password($random_password, $user->ID);
+            $user = $user->ID;
         } else {
             $user = wp_create_user($email, $random_password, $email);
         }
@@ -951,15 +993,16 @@ class AjaxCustomer
             wp_send_json_error(['msg' => 'Lỗi không tạo được tài khoản!']);
         } else {
 
-            $result["id"] = $user->ID;
+            $result["id"] = $user;
             $result["username"] = $email;
             $result["password"] =  $random_password;
 
-            update_post_meta($id, 'user-id', $user->ID);
-            update_user_meta($user->ID, 'customer-id', $id);
-            update_user_meta($user->ID, 'first_name', get_post_meta($id, 'name', true));
-            update_user_meta($user->ID, 'phone', get_post_meta($id, 'phone', true));
-            update_user_meta($user->ID, 'address', get_post_meta($id, 'address', true));
+            update_post_meta($id, 'user-id', $user);
+            update_user_meta($user, 'customer-id', $id);
+            update_user_meta($user, 'nickname', get_post_meta($id, 'name', true));
+            update_user_meta($user, 'first_name', get_post_meta($id, 'name', true));
+            update_user_meta($user, 'phone', get_post_meta($id, 'phone', true));
+            update_user_meta($user, 'address', get_post_meta($id, 'address', true));
 
             wp_send_json_success(['msg' => 'Tạo thành công', 'user' => (object)$result]);
         }
@@ -968,7 +1011,7 @@ class AjaxCustomer
     }
     public function delete_images_not_exsits($idParent, $id_exsits, $force_delete = true)
     {
-        global $CDWFunc;
+        global $CDWFunc, $CDWEmail;
         $args = array(
             'post_type' => 'attachment',
             'posts_per_page' => -1,
@@ -992,7 +1035,7 @@ class AjaxCustomer
     }
     public function func_update_info_by_billing_customer()
     {
-        global $CDWFunc;
+        global $CDWFunc, $CDWEmail;
         // First check the nonce, if it fails the function will break
         check_ajax_referer('ajax-detail-customer-nonce', 'security');
 
@@ -1032,8 +1075,16 @@ class AjaxCustomer
                         update_post_meta($item["id"], 'expiry_date', $expiry_date_new);
 
                         break;
-
-
+                    case "customer-plugin":
+                        $expiry_date = get_post_meta($item["id"], 'expiry_date', true);
+                        $expiry_date_new = $CDWFunc->date->addYears($expiry_date, $item["quantity"], $CDWFunc->date->formatDB);
+                        update_post_meta($item["id"], 'expiry_date', $expiry_date_new);
+                        $license_code = get_post_meta($item["id"], 'license', true);
+                        $license = get_license_by_code($license_code);
+                        if (!empty($license)) {
+                            update_post_meta($license->ID, '_expires_at', $expiry_date_new);
+                        }
+                        break;
                     case "manage-hosting":
                         $buy_date =  $CDWFunc->date->getCurrentDateTime();
                         $quantity = (float)$item["quantity"];
@@ -1111,7 +1162,7 @@ class AjaxCustomer
                         $quantity = (float)$item["quantity"];
                         $themes = [
                             [
-                                'name' => $quantity . ' x ' . $item["service"],
+                                'name' => $item["service"],
                                 'price' => (float) $item["price"],
                                 'site-type' => empty($item["id"]) ? "" : $item["id"],
                                 'date' => $buy_date
@@ -1126,25 +1177,28 @@ class AjaxCustomer
                         }
                         break;
 
-
-                    case 'plugin':
-
+                    case 'manage-plugin':
                         $buy_date =  $CDWFunc->date->getCurrentDateTime();
                         $quantity = (float)$item["quantity"];
+                        $license_id = cdw_create_license($item["id"], 'premium', $quantity, 'active', '', '', '', $id);
                         $plugins = [
                             [
-                                'name' => $quantity . ' x ' . $item["service"],
-                                'price' => (float) $item["price"],
+                                'name' => $item["service"],
                                 'plugin-type' => empty($item["id"]) ? "" : $item["id"],
-                                'date' => $buy_date
+                                'price' => (float) $item["price"],
+                                'date' => $buy_date,
+                                'expiry_date' => $CDWFunc->date->addYears($buy_date, $quantity, "Y-m-d H:i:s"),
+                                'license' => cdw_get_license_code($license_id)
                             ]
                         ];
 
                         if (is_array($plugins) && count($plugins) > 0) {
-                            $pluginColumns = ['name', 'price', 'plugin-type'];
-                            $pluginColumnDates = ['date'];
+                            $pluginColumns = ['name', 'price', 'plugin-type', 'license'];
+                            $pluginColumnDates = ['date', 'expiry_date'];
                             $plugins =  $CDWFunc->wpdb->func_new_detail_post('customer-plugin', 'customer-id', $customer_billing_id, $plugins, $pluginColumns);
                             $CDWFunc->wpdb->func_update_detail_post_type_date('customer-plugin', 'customer-id', $customer_billing_id, $plugins, $pluginColumnDates);
+
+                            $CDWEmail->sendEmailLicense($plugins[0]['id'], true);
                         }
                         break;
                 }

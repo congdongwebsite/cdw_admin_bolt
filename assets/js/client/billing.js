@@ -23,7 +23,7 @@ var billing = (function (self, base) {
     },
     {
       targets: 2,
-      render: dateFormatter,
+      render: dateBillingFormatter,
     },
     {
       targets: 4,
