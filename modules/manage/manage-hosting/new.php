@@ -82,7 +82,13 @@ $ids = get_posts($arr);
                         <input type="number" id="stt" name="stt" class="form-control" value="<?php echo count($ids) + 1; ?>">
                     </div>
                 </div>
-                <div class="col-lg-10 col-md-10 col-sm-10 col-10">
+                <div class="col-lg-2 col-md-2 col-sm-2 col-2">
+                    <div class="form-group">
+                        <label for="stt" class="control-label">Package</label>
+                        <select id='package' name='package' class='select2 form-control' data-value="<?php echo get_post_meta($id_detail, 'package', true); ?>"></select>
+                    </div>
+                </div>
+                <div class="col-lg-8 col-md-8 col-sm-8 col-8">
                     <div class="form-group">
                         <label for="note" class="control-label">Ghi chú</label>
                         <input type="text" id="note" name="note" class="form-control">

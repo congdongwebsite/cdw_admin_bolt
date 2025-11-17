@@ -9,6 +9,16 @@
     "show": true
   },
   {
+    "title": "Tất cả dịch vụ",
+    "module": "manage-report",
+    "moduleName": "Tất cả dịch vụ",
+    "action": "all-service",
+    "actionName": "Tất cả dịch vụ",
+    "icon": "icon-drawer",
+    "show": true,
+    "items": []
+  },
+  {
     "title": "Khách hàng",
     "module": "manage",
     "moduleName": "Quản lý",

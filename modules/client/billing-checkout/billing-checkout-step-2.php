@@ -139,7 +139,21 @@ if (isset($_GET['id'])) $step = 2;
                             </div>
                             <div class="row clearfix">
                                 <div class="hidden-print col-md-12 text-right">
-
+                                    <?php
+                                    if (($checkoutStatus == 'pending' || $checkoutStatus == 'publish') && $checkoutStatus != 'success' && $checkoutStatus != 'cancel' && !empty($checkoutStatus)) {
+                                    ?>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" value="" id="acceptTerms" required>
+                                            <label class="form-check-label" for="acceptTerms">
+                                                Tôi xác nhận đã đọc và chấp nhận với các <a style=" color: blue; " href="https://www.congdongweb.com/dieu-khoan-su-dung/" target="_blank">Điều khoản sử dụng dịch vụ</a>, <a style=" color: blue; " href="https://www.congdongweb.com/chinh-sach-thu-thap-va-xu-ly-du-lieu-ca-nhan/" target="_blank">Chính sách quyền riêng tư</a>
+                                            </label>
+                                            <div class="invalid-feedback">
+                                                Bạn phải chấp nhận các điều khoản và chính sách để tiếp tục.
+                                            </div>
+                                        </div>
+                                    <?php
+                                    }
+                                    ?>
                                     <span class="mb-0 text-danger"><strong>Chú ý:</strong> Tổng tộng được tính tạm thời và được tính lại sau khi bạn ấn vào nút thanh toán. **Hóa đơn sẽ được tải lại sau khi ấn thanh toán.</span>
                                     <hr>
                                     <button class="btn btn-outline-secondary btn-print"><i class="icon-printer"></i></button>
@@ -147,6 +161,13 @@ if (isset($_GET['id'])) $step = 2;
                                     if ($checkoutStatus != 'cancel') {
                                     ?>
                                         <button class="btn btn-danger btn-cancel">Hủy</button>
+                                    <?php
+                                    }
+                                    ?>
+                                    <?php
+                                    if (($checkoutStatus == 'pending' || $checkoutStatus == 'publish') && $checkoutStatus != 'success' && $checkoutStatus != 'cancel' && !empty($checkoutStatus)) {
+                                    ?>
+                                        <button class="btn btn-primary btn-checkout-payment">Thanh toán</button>
                                     <?php
                                     }
                                     ?>

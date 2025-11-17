@@ -72,7 +72,7 @@ if ($tax->has) {
                                                             <td class="service"><?php echo $item["service"]; ?></td>
                                                             <td class="description hidden-sm-down"><?php echo $item["description"]; ?></td>
 
-                                                            <td class="quantity text-right"><input type="number" name="quantity" style="width: 80px;" min="1" step="1" id="quantity" value="<?php echo $item["quantity"]; ?>" class="form-control text-right m-auto"></td>
+                                                            <td class="quantity text-right"><input type="number" name="quantity" style="width: 80px;" min="1" step="1" id="quantity" value="<?php echo $item["quantity"]; ?>" class="form-control text-right m-auto" <?php echo isset($item['type']) && $item['type'] == 'customer-email-change' ? 'readonly' : '' ?>></td>
 
                                                             <td class="price hidden-sm-down text-right" data-price="<?php echo (float) $item["price"]; ?>"><?php echo $CDWFunc->number->amount($item["price"]); ?></td>
                                                             <td class="amount text-right" data-amount="<?php echo (float) $item["amount"]; ?>"><span><?php echo $CDWFunc->number->amount($item["amount"]); ?></span></td>
@@ -121,7 +121,15 @@ if ($tax->has) {
 
                             <div class="row clearfix">
                                 <div class="hidden-print col-md-12 text-right">
-
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" value="" id="acceptTerms" required>
+                                        <label class="form-check-label" for="acceptTerms">
+                                            Tôi xác nhận đã đọc và chấp nhận với các <a style=" color: blue; " href="https://www.congdongweb.com/dieu-khoan-su-dung/" target="_blank">Điều khoản sử dụng dịch vụ</a>, <a style=" color: blue; " href="https://www.congdongweb.com/chinh-sach-thu-thap-va-xu-ly-du-lieu-ca-nhan/" target="_blank">Chính sách quyền riêng tư</a>
+                                        </label>
+                                        <div class="invalid-feedback">
+                                            Bạn phải chấp nhận các điều khoản và chính sách để tiếp tục.
+                                        </div>
+                                    </div>
                                     <button class="btn btn-outline-secondary btn-print"><i class="icon-printer"></i></button>
                                     <button class="btn btn-primary btn-checkout">Thanh toán</button>
 

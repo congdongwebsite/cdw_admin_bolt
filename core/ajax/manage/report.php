@@ -22,7 +22,7 @@ class AjaxManageReport
         // First check the nonce, if it fails the function will break
         check_ajax_referer('ajax-report-index-nonce', 'security');
 
-        $columns = ['url', 'price', 'buy_date', 'expiry_date', 'url_dns', 'ip'];
+        $columns = ['url', 'price', 'buy_date', 'expiry_date', 'url_dns', 'ip', 'inet_domain_id'];
         $fieldSearch = ['url', 'price', 'buy_date', 'expiry_date', 'url_dns', 'ip'];
         $arr = array(
             'post_type' => 'customer-domain',
@@ -52,6 +52,17 @@ class AjaxManageReport
             }
         }
 
+        if ($CDWFunc->isAdministrator()) {
+            $userID = wp_get_current_user()->ID;
+            $customer_id = get_user_meta($userID, 'customer-default-id', true);
+            if (!empty($customer_id))
+                $arr['meta_query'][] =
+                    array(
+                        'key' => "customer-id",
+                        'value' => $customer_id,
+                        'compare' => '=',
+                    );
+        }
         if ($CDWFunc->date->isValidDateFormat($from_date)) {
             $from_date_d = $CDWFunc->date->convertDateTime($from_date);
             $arr['meta_query'][] = array(
@@ -159,6 +170,8 @@ class AjaxManageReport
             $item['action'] = '';
             $item['urlUpdateDNS'] = $CDWFunc->getUrl('domain', 'client', 'subaction=update-dns&id=' . $id);
             $item['urlUpdateRecord'] = $CDWFunc->getUrl('domain', 'client', 'subaction=update-record&id=' . $id);
+            $item['privacy_protection_status'] = get_post_meta($id, 'privacy_protection_status', true);
+
             $data[] = $item;
         }
 
@@ -203,7 +216,17 @@ class AjaxManageReport
                     );
             }
         }
-
+        if ($CDWFunc->isAdministrator()) {
+            $userID = wp_get_current_user()->ID;
+            $customer_id = get_user_meta($userID, 'customer-default-id', true);
+            if (!empty($customer_id))
+                $arr['meta_query'][] =
+                    array(
+                        'key' => "customer-id",
+                        'value' => $customer_id,
+                        'compare' => '=',
+                    );
+        }
         if ($CDWFunc->date->isValidDateFormat($from_date)) {
             $from_date_d = $CDWFunc->date->convertDateTime($from_date);
             $arr['meta_query'][] = array(
@@ -251,7 +274,6 @@ class AjaxManageReport
                     'compare' => '>=',
                     'type'    => 'DATE'
                 );
-                break;
                 break;
             case "expired":
                 $arr['meta_query'][] = array(
@@ -368,6 +390,18 @@ class AjaxManageReport
                     );
             }
         }
+
+        if ($CDWFunc->isAdministrator()) {
+            $userID = wp_get_current_user()->ID;
+            $customer_id = get_user_meta($userID, 'customer-default-id', true);
+            if (!empty($customer_id))
+                $arr['meta_query'][] =
+                    array(
+                        'key' => "customer-id",
+                        'value' => $customer_id,
+                        'compare' => '=',
+                    );
+        }
         if ($CDWFunc->date->isValidDateFormat($from_date)) {
             $from_date_d = $CDWFunc->date->convertDateTime($from_date);
             $arr['meta_query'][] = array(
@@ -469,6 +503,17 @@ class AjaxManageReport
             }
         }
 
+        if ($CDWFunc->isAdministrator()) {
+            $userID = wp_get_current_user()->ID;
+            $customer_id = get_user_meta($userID, 'customer-default-id', true);
+            if (!empty($customer_id))
+                $arr['meta_query'][] =
+                    array(
+                        'key' => "customer-id",
+                        'value' => $customer_id,
+                        'compare' => '=',
+                    );
+        }
         if ($CDWFunc->date->isValidDateFormat($from_date)) {
             $from_date_d = $CDWFunc->date->convertDateTime($from_date);
             $arr['meta_query'][] = array(
@@ -598,6 +643,17 @@ class AjaxManageReport
             }
         }
 
+        if ($CDWFunc->isAdministrator()) {
+            $userID = wp_get_current_user()->ID;
+            $customer_id = get_user_meta($userID, 'customer-default-id', true);
+            if (!empty($customer_id))
+                $arr['meta_query'][] =
+                    array(
+                        'key' => "customer-id",
+                        'value' => $customer_id,
+                        'compare' => '=',
+                    );
+        }
         if ($CDWFunc->date->isValidDateFormat($from_date)) {
             $from_date_d = $CDWFunc->date->convertDateTime($from_date);
             $arr['meta_query'][] = array(
@@ -612,7 +668,8 @@ class AjaxManageReport
             $arr['meta_query'][] = array(
                 'key' => 'buy_date',
                 'value' => $until_date_d,
-                'compare' => '<=', 'type' => 'DATE'
+                'compare' => '<=',
+                'type' => 'DATE'
             );
         }
         if ($CDWFunc->date->isValidDateFormat($from_expiry_date)) {
@@ -629,7 +686,8 @@ class AjaxManageReport
             $arr['meta_query'][] = array(
                 'key' => 'expiry_date',
                 'value' => $until_expiry_date_d,
-                'compare' => '<=', 'type' => 'DATE'
+                'compare' => '<=',
+                'type' => 'DATE'
             );
         }
 
@@ -649,7 +707,8 @@ class AjaxManageReport
                 $arr['meta_query'][] = array(
                     'key' => 'expiry_date',
                     'value' => $CDWFunc->date->getCurrentDateTime(),
-                    'compare' => '<', 'type' => 'DATE'
+                    'compare' => '<',
+                    'type' => 'DATE'
                 );
                 break;
             case "closetoexpiration":
@@ -663,7 +722,8 @@ class AjaxManageReport
                 $arr['meta_query'][] = array(
                     'key' => 'expiry_date',
                     'value' => $CDWFunc->date->addMonths($CDWFunc->date->getCurrentDateTime(), 1, $CDWFunc->date->formatDB),
-                    'compare' => '<=', 'type' => 'DATE'
+                    'compare' => '<=',
+                    'type' => 'DATE'
                 );
                 break;
         }
@@ -745,6 +805,17 @@ class AjaxManageReport
             }
         }
 
+        if ($CDWFunc->isAdministrator()) {
+            $userID = wp_get_current_user()->ID;
+            $customer_id = get_user_meta($userID, 'customer-default-id', true);
+            if (!empty($customer_id))
+                $arr['meta_query'][] =
+                    array(
+                        'key' => "customer-id",
+                        'value' => $customer_id,
+                        'compare' => '=',
+                    );
+        }
         if ($CDWFunc->date->isValidDateFormat($from_date)) {
             $from_date_d = $CDWFunc->date->convertDateTime($from_date);
             $arr['meta_query'][] = array(

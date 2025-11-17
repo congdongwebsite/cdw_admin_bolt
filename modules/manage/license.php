@@ -110,7 +110,7 @@
       </div>
       <div class="modal-body">
         <p><strong>Mã giấy phép:</strong> <span id="modal-license-key"></span></p>
-        <p><strong>Plugin ID:</strong> <span id="modal-plugin-id"></span></p>
+        <p><strong>Plugin Code:</strong> <span id="modal-plugin-code"></span></p>
         <hr>
         <p>Sử dụng các chi tiết này để kiểm tra endpoint `verify_license_key`.</p>
       </div>

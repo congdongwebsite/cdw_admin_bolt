@@ -4,7 +4,9 @@
     <?php require_once('filter-email.php'); ?>
     <div class="card">
         <div class="body">
-            <table id="tb-data" class="table table-bordered table-hover table-striped w-100 dataTable">
+            <table id="tb-data" class="table table-bordered table-hover table-striped w-100 dataTable"></table>
         </div>
     </div>
 </div>
+<?php require_once('modal-register-email.php'); ?>
+<?php require_once('modal-change-email-plan.php'); ?>

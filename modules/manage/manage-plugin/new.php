@@ -20,6 +20,12 @@ global $CDWFunc;
                         </div>
                         <div class="col-lg-6 col-md-6 col-sm-6 col-12">
                             <div class="form-group">
+                                <label for="code" class="control-label">Code</label>
+                                <input type="text" id="code" name="code" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-12">
+                            <div class="form-group">
                                 <label for="name" class="control-label">Tên plugin</label>
                                 <input type="text" id="name" name="name" class="form-control" required>
                             </div>

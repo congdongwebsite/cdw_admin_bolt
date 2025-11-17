@@ -128,7 +128,7 @@ function create_customer_hosting_cpt()
 {
 
     $labels = array(
-        'name' => _x('Customer Hosting', 'Post Type General Name', 'congdongweb'),
+        'name' => _x('Hosting', 'Post Type General Name', 'congdongweb'),
         'singular_name' => _x('Customer Hosting', 'Post Type Singular Name', 'congdongweb'),
         'menu_name' => _x('Customer Hosting', 'Admin Menu text', 'congdongweb'),
         'name_admin_bar' => _x('Customer Hosting', 'Add New on Toolbar', 'congdongweb'),
@@ -189,7 +189,7 @@ function create_customer_domain_cpt()
 {
 
     $labels = array(
-        'name' => _x('Customer Domain', 'Post Type General Name', 'congdongweb'),
+        'name' => _x('Domain', 'Post Type General Name', 'congdongweb'),
         'singular_name' => _x('Customer Domain', 'Post Type Singular Name', 'congdongweb'),
         'menu_name' => _x('Customer Domain', 'Admin Menu text', 'congdongweb'),
         'name_admin_bar' => _x('Customer Domain', 'Add New on Toolbar', 'congdongweb'),
@@ -250,7 +250,7 @@ function create_customer_email_cpt()
 {
 
     $labels = array(
-        'name' => _x('Customer Email', 'Post Type General Name', 'congdongweb'),
+        'name' => _x('Email', 'Post Type General Name', 'congdongweb'),
         'singular_name' => _x('Customer Email', 'Post Type Singular Name', 'congdongweb'),
         'menu_name' => _x('Customer Email', 'Admin Menu text', 'congdongweb'),
         'name_admin_bar' => _x('Customer Email', 'Add New on Toolbar', 'congdongweb'),
@@ -310,7 +310,7 @@ function create_customer_theme_cpt()
 {
 
     $labels = array(
-        'name' => _x('Customer Theme', 'Post Type General Name', 'congdongweb'),
+        'name' => _x('Theme', 'Post Type General Name', 'congdongweb'),
         'singular_name' => _x('Customer Theme', 'Post Type Singular Name', 'congdongweb'),
         'menu_name' => _x('Customer Theme', 'Admin Menu text', 'congdongweb'),
         'name_admin_bar' => _x('Customer Theme', 'Add New on Toolbar', 'congdongweb'),
@@ -371,7 +371,7 @@ function create_customer_plugin_cpt()
 {
 
     $labels = array(
-        'name' => _x('Customer Plugin', 'Post Type General Name', 'congdongweb'),
+        'name' => _x('Plugin', 'Post Type General Name', 'congdongweb'),
         'singular_name' => _x('Customer Plugin', 'Post Type Singular Name', 'congdongweb'),
         'menu_name' => _x('Customer Plugin', 'Admin Menu text', 'congdongweb'),
         'name_admin_bar' => _x('Customer Plugin', 'Add New on Toolbar', 'congdongweb'),
@@ -1650,6 +1650,67 @@ function create_version_detail_cpt()
     register_post_type('version-detail', $args);
 }
 add_action('init', 'create_version_detail_cpt', 0);
+
+// Register Custom Post Type Customer Log
+// Post Type Key: customer-log
+function create_customer_log_cpt()
+{
+
+    $labels = array(
+        'name' => _x('Customer Log', 'Post Type General Name', 'congdongweb'),
+        'singular_name' => _x('Customer Log', 'Post Type Singular Name', 'congdongweb'),
+        'menu_name' => _x('Customer Log', 'Admin Menu text', 'congdongweb'),
+        'name_admin_bar' => _x('Customer Log', 'Add New on Toolbar', 'congdongweb'),
+        'archives' => __('Customer Log', 'congdongweb'),
+        'attributes' => __('Customer Log', 'congdongweb'),
+        'parent_item_colon' => __('Customer Log', 'congdongweb'),
+        'all_items' => __('All Customer Log', 'congdongweb'),
+        'add_new_item' => __('Add New Customer Log', 'congdongweb'),
+        'add_new' => __('Add New', 'congdongweb'),
+        'new_item' => __('New Customer Log', 'congdongweb'),
+        'edit_item' => __('Edit Customer Log', 'congdongweb'),
+        'update_item' => __('Update Customer Log', 'congdongweb'),
+        'view_item' => __('View Customer Log', 'congdongweb'),
+        'view_items' => __('View Customer Log', 'congdongweb'),
+        'search_items' => __('Search Customer Log', 'congdongweb'),
+        'not_found' => __('Not found', 'congdongweb'),
+        'not_found_in_trash' => __('Not found in Trash', 'congdongweb'),
+        'featured_image' => __('Featured Image', 'congdongweb'),
+        'set_featured_image' => __('Set featured image', 'congdongweb'),
+        'remove_featured_image' => __('Remove featured image', 'congdongweb'),
+        'use_featured_image' => __('Use as featured image', 'congdongweb'),
+        'insert_into_item' => __('Insert into Customer Log', 'congdongweb'),
+        'uploaded_to_this_item' => __('Uploaded to this Customer Log', 'congdongweb'),
+        'items_list' => __('Customer Log list', 'congdongweb'),
+        'items_list_navigation' => __('Customer Log list navigation', 'congdongweb'),
+        'filter_items_list' => __('Filter Customer Log list', 'congdongweb'),
+    );
+
+    $args = array(
+        'label' => __('Customer Log', 'congdongweb'),
+        'description' => __('Log các hoạt động của khách hàng', 'congdongweb'),
+        'labels' => $labels,
+        'menu_icon' => 'dashicons-admin-appearance',
+        'supports' => array('title', 'editor'),
+        'taxonomies' => array(),
+        'hierarchical' => false,
+        'exclude_from_search' => true,
+        'publicly_queryable' => false,
+        'has_archive' => false,
+        'public' => false,
+        'show_ui' => false,
+        'show_in_menu' => false,
+        'show_in_admin_bar' => false,
+        'can_export' => false,
+        'show_in_nav_menus' => false,
+        'menu_position' => 5,
+        'capability_type' => 'post',
+        'show_in_rest' => false,
+    );
+
+    register_post_type('customer-log', $args);
+}
+add_action('init', 'create_customer_log_cpt', 0);
 
 
 

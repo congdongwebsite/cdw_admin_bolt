@@ -112,6 +112,7 @@ var newManageHosting = (function (self, base, details) {
       siteSettings.OptionAutoNumericAmountVND
     );
     initSelect2HostingFeature("feature", base.form);
+    initSelect2HostingPackage("package", base.form);
   };
 
   return self;

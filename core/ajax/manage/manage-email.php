@@ -11,7 +11,9 @@ class AjaxManageEmail
         add_action('wp_ajax_ajax_update-manage-email',  array($this, 'func_update'));
         add_action('wp_ajax_ajax_delete-manage-email',  array($this, 'func_delete'));
         add_action('wp_ajax_ajax_load-manage-email-detail',  array($this, 'func_load_manage_email_detail'));
+        add_action('wp_ajax_ajax_get_inet_email_plan_detail',  array($this, 'func_get_inet_email_plan_detail'));
     }
+
     public function func_get_list()
     {
         global $CDWFunc;
@@ -58,11 +60,14 @@ class AjaxManageEmail
             $hhd = get_post_meta($post->ID, 'hhd', true);
             $note = get_post_meta($post->ID, 'note', true);
             $stt = get_post_meta($post->ID, 'stt', true);
+            $stt = get_post_meta($post->ID, 'stt', true);
+            $inet_plan_id = get_post_meta($post->ID, 'inet_plan_id', true);
 
             $data[] = [
                 'urlredirect' => $urlredirect,
                 'id' => $post->ID,
                 'stt' => $stt,
+                'inet_plan_id' => $inet_plan_id,
                 'title' => $title,
                 'gia' => $gia,
                 'gia_han' => $gia_han,
@@ -107,6 +112,7 @@ class AjaxManageEmail
             $hhd = isset($_POST['hhd']) ? $_POST['hhd'] : '';
             $note = isset($_POST['note']) ? $_POST['note'] : '';
             $stt = isset($_POST['stt']) ? $_POST['stt'] : '';
+            $inet_plan_id = isset($_POST['inet_plan_id']) ? $_POST['inet_plan_id'] : '';
 
 
             add_post_meta($id, 'gia', $gia);
@@ -115,6 +121,7 @@ class AjaxManageEmail
             add_post_meta($id, 'hhd', $hhd);
             add_post_meta($id, 'note', $note);
             add_post_meta($id, 'stt', $stt);
+            add_post_meta($id, 'inet_plan_id', $inet_plan_id);
 
             //Detail
             $details = isset($_POST['details']) ? $_POST['details'] : [];
@@ -185,6 +192,7 @@ class AjaxManageEmail
             $hhd = isset($_POST['hhd']) ? $_POST['hhd'] : '';
             $note = isset($_POST['note']) ? $_POST['note'] : '';
             $stt = isset($_POST['stt']) ? $_POST['stt'] : '';
+            $inet_plan_id = isset($_POST['inet_plan_id']) ? $_POST['inet_plan_id'] : '';
 
             update_post_meta($id, 'gia', $gia);
             update_post_meta($id, 'gia_han', $gia_han);
@@ -192,6 +200,7 @@ class AjaxManageEmail
             update_post_meta($id, 'hhd', $hhd);
             update_post_meta($id, 'note', $note);
             update_post_meta($id, 'stt', $stt);
+            update_post_meta($id, 'inet_plan_id', $inet_plan_id);
 
             //Detail
             $details = isset($_POST['details']) ? $_POST['details'] : [];
@@ -246,7 +255,8 @@ class AjaxManageEmail
         $check = wp_delete_post($id, true);
         if (!$check ||  $check == null) {
             wp_send_json_error(['msg' => 'Lỗi không xóa được bài đăng']);
-        } else {
+        }
+        else {
             $CDWFunc->wpdb->func_delete_detail_post('email-detail', 'email-id', $id);
             wp_send_json_success(['msg' => 'Xóa thành công', 'id' => $id]);
         }
@@ -277,7 +287,8 @@ class AjaxManageEmail
 
         if (!$check ||  $check == null) {
             wp_send_json_error(['msg' => 'Lỗi không xóa được bài đăng']);
-        } else
+        }
+        else
             wp_send_json_success(['msg' => 'Xóa thành công', 'id' => $id]);
 
         wp_die();
@@ -297,6 +308,51 @@ class AjaxManageEmail
         $data =  $CDWFunc->wpdb->func_load_detail($postType, 'email-id', $_POST['id'], $columns, 'date');
 
         wp_send_json_success($data);
+        wp_die();
+    }
+
+    public function func_get_inet_email_plan_detail()
+    {
+        check_ajax_referer('ajax-new-manage-email-nonce', 'security');
+
+        if (!isset($_POST['plan_id'])) {
+            wp_send_json_error(['msg' => 'Không có ID gói']);
+        }
+        $plan_id = $_POST['plan_id'];
+
+        global $CDWFunc;
+        $inet_api = $CDWFunc->iNET;
+
+        $response = $inet_api->get_service_plans('EMAIL');
+
+        if ($response['status'] > 200) {
+            wp_send_json_error(['msg' => 'Không thể lấy danh sách gói từ iNET', 'data' => json_decode($response['data'])]);
+        }
+
+        $all_plans = json_decode($response['data'], true);
+        $plan_detail = null;
+
+        foreach ($all_plans as $plan) {
+            if (isset($plan['serviceType']) && $plan['serviceType'] == 'EMAIL' && $plan['id'] == $plan_id) {
+                $plan_detail = $plan;
+                break;
+            }
+        }
+
+        if ($plan_detail) {
+            $response_data = [
+                'title' => $plan_detail['name'],
+                'id' => $plan_detail['id'],
+                'account' => isset($plan_detail['attribute']['emailAccount']) ? $plan_detail['attribute']['emailAccount'] : '',
+                'hhd' => isset($plan_detail['attribute']['storage']) ? $plan_detail['attribute']['storage'] : '',
+                'gia' => $plan_detail['price'],
+                'gia_han' => isset($plan_detail['price_renew']) ? $plan_detail['price_renew'] : $plan_detail['price']
+            ];
+            wp_send_json_success($response_data);
+        } else {
+            wp_send_json_error(['msg' => 'Không tìm thấy chi tiết gói']);
+        }
+
         wp_die();
     }
 }

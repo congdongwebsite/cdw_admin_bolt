@@ -1,6 +1,10 @@
 var baseReport = (self) => {
+  // self.dom =
+  //   "<'row'<'col-sm-12 col-md-3'l><'col-sm-12 col-md-6'B><'col-sm-12 col-md-3'f>>" +
+  //   "<'row'<'col-sm-12'tr>>" +
+  //   "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
   self.dom =
-    "<'row'<'col-sm-12 col-md-3'l><'col-sm-12 col-md-6'B><'col-sm-12 col-md-3'f>>" +
+    "<'row'<'col-sm-12 col-md-3'l><'col-sm-12 col-md-6'B><'col-sm-12 col-md-3 custom-search-area'>>" +
     "<'row'<'col-sm-12'tr>>" +
     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
 
@@ -30,6 +34,7 @@ var baseReport = (self) => {
   self.columnDefs;
   self.order;
   self.actionDelete;
+  self.serverSide = false;
   self.ajaxData = {
     action: self.action,
     security: self.security,
@@ -97,10 +102,12 @@ var baseReport = (self) => {
         scrollCollapse: true,
         responsive: true,
         paging: true,
+        serverSide: self.serverSide,
         processing: true,
         ordering: false,
         select: {
           items: "row",
+          style: 'multi',
           info: false,
         },
         ajax: {
@@ -117,6 +124,25 @@ var baseReport = (self) => {
         buttons: self.buttons,
       })
       .api();
+    self.table.on('init.dt', function () {
+      $('.custom-search-area').html(`
+        <input type="text" id="localSearch" class="form-control" placeholder="Tìm trong trang hiện tại..." />
+      `);
+
+      $('#localSearch').on('keyup', function () {
+        const value = this.value.toLowerCase();
+
+        self.api.rows({ page: 'current' }).every(function () {
+          const row = this.node();
+          const text = $(row).text().toLowerCase();
+          $(row).toggle(text.includes(value));
+        });
+      });
+
+      self.table.on('draw', function () {
+        $('#localSearch').trigger('keyup');
+      });
+    });
 
     self.table.on("draw.dt", (e) => {
       let pageInfo = self.api.page.info();

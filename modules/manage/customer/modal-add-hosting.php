@@ -70,7 +70,7 @@
                                 <div class="col-lg-3 col-md-6 col-sm-12 col-12">
                                     <div class="form-group">
                                         <label for="pass" class="control-label">Mật khẩu</label>
-                                        <input type="password" id="pass" name="pass" class="form-control" required>
+                                        <input type="text" id="pass" name="pass" class="form-control" required>
                                     </div>
                                 </div>
                             </div>
@@ -78,10 +78,15 @@
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-close">Đóng</button>
-                <button type="button" class="btn btn-primary btn-add">Thêm</button>
-                <button type="button" class="btn btn-primary btn-add-close">Thêm và đóng</button>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <div>
+                    <button type="button" class="btn btn-primary btn-change-pass">Đổi mật khẩu</button>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-secondary btn-close">Đóng</button>
+                    <button type="button" class="btn btn-primary btn-add">Thêm</button>
+                    <button type="button" class="btn btn-primary btn-add-close">Thêm và đóng</button>
+                </div>
             </div>
         </div>
     </div>

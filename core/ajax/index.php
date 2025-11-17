@@ -488,7 +488,7 @@ class IndexAdmin
             'post_type' => 'manage-vps',
             'post_status' => 'publish',
             'fields' => 'ids',
-            'numberposts ' => 10,
+            'posts_per_page' => 10,
             'meta_key' => 'service_expiry_date',
             'orderby' => 'meta_value_num',
             'meta_type' => 'DATE',
@@ -509,7 +509,8 @@ class IndexAdmin
                     'value'   => $CDWFunc->date->getCurrentDateTime(),
                     'compare' => '>=',
                     'type'    => 'DATE'
-                ), array(
+                ),
+                array(
                     'key'     => 'expiry_date',
                     'value'   => $CDWFunc->date->addMonths($CDWFunc->date->getCurrentDateTime(), 1, $CDWFunc->date->formatDB),
                     'compare' => '<=',
@@ -539,21 +540,21 @@ class IndexAdmin
         $arr = array(
             'post_type' => 'customer-domain',
             'post_status' => 'publish',
-            'numberposts ' => -1,
             'meta_key' => 'expiry_date',
             'orderby' => 'meta_value_num',
             'meta_type' => 'DATE',
             'order' => 'DESC',
             'fields' => 'ids',
+            'posts_per_page' => -1
         );
         $arr['meta_query'] = array(
             'relation'   => 'or',
-            array(
-                'key'     => 'expiry_date',
-                'value'   => $CDWFunc->date->getCurrentDateTime(),
-                'compare' => '<',
-                'type'    => 'DATE'
-            ),
+            // array(
+            //     'key'     => 'expiry_date',
+            //     'value'   => $CDWFunc->date->getCurrentDateTime(),
+            //     'compare' => '<',
+            //     'type'    => 'DATE'
+            // ),
             array(
                 'relation'   => 'and',
                 array(
@@ -561,7 +562,8 @@ class IndexAdmin
                     'value'   => $CDWFunc->date->getCurrentDateTime(),
                     'compare' => '>=',
                     'type'    => 'DATE'
-                ), array(
+                ),
+                array(
                     'key'     => 'expiry_date',
                     'value'   => $CDWFunc->date->addMonths($CDWFunc->date->getCurrentDateTime(), 1, $CDWFunc->date->formatDB),
                     'compare' => '<=',
@@ -705,7 +707,7 @@ class IndexAdmin
         $arr = array(
             'post_type' => 'customer-hosting',
             'post_status' => 'publish',
-            'numberposts ' => 10,
+            'posts_per_page' => 10,
             'meta_key' => 'expiry_date',
             'orderby' => 'meta_value_num',
             'meta_type' => 'DATE',
@@ -766,7 +768,7 @@ class IndexAdmin
         $arr = array(
             'post_type' => 'customer-domain',
             'post_status' => 'publish',
-            'numberposts ' => 10,
+            'posts_per_page' => 10,
             'meta_key' => 'expiry_date',
             'orderby' => 'meta_value_num',
             'meta_type' => 'DATE',
@@ -838,7 +840,7 @@ class IndexAdmin
         $arr = array(
             'post_type' => 'customer-billing',
             'post_status' => 'publish',
-            'numberposts ' => 10,
+            'posts_per_page' => 10,
             'meta_key' => 'date',
             'orderby' => 'meta_value_num',
             'meta_type' => 'DATE',
@@ -873,17 +875,29 @@ class IndexAdmin
 
     public function func_admin_update_customer_default()
     {
-        global $CDWFunc;
+        global $CDWFunc, $CDWCart;
         // First check the nonce, if it fails the function will break
         check_ajax_referer('ajax-index-nonce', 'security');
         if ($CDWFunc->isAdministrator()) {
             $userID = wp_get_current_user()->ID;
             $id = isset($_POST['id']) ? $_POST['id'] : "";
+
+            $cart_items = $CDWCart->get();
+            $customer_id = "";
+            foreach ($cart_items as $item) {
+                $customer_id_cart = get_post_meta($item["id"], "customer-id", true);
+                if (empty($customer_id_cart)) continue;
+                $customer_id = $customer_id_cart;
+            }
+
+            if (!empty($customer_id) && !empty($id) && $id != $customer_id) {
+                wp_send_json_error(['msg' => 'Giỏ hàng hiện tại đang có dữ liệu, không thể thay đổi khách hàng.<br>Vui lòng tải lại trang.']);
+            }
             if (empty($id) || !is_numeric($id)) {
                 delete_user_meta($userID, 'customer-default-id',  $id);
             } else {
-                if(!get_post_status($id)){
-                    wp_send_json_success(['msg' => 'Không tìm thấy khách hàng yêu cầu']);
+                if (!get_post_status($id)) {
+                    wp_send_json_error(['msg' => 'Không tìm thấy khách hàng yêu cầu']);
                 }
                 update_user_meta($userID, 'customer-default-id',  $id);
             }

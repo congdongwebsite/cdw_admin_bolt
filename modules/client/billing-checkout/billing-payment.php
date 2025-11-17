@@ -29,7 +29,7 @@
                 </div>
             </div>
         </div>
-        <!-- <div class="col-xl-3 col-lg-4 col-md-5 col-sm-6 col-6">
+        <div class="col-xl-3 col-lg-4 col-md-5 col-sm-6 col-6">
             <div class="card w-auto">
                 <div class="body p-2">
                     <div class="currency_state d-flex justify-content-end">
@@ -41,6 +41,6 @@
                     </div>
                 </div>
             </div>
-        </div> -->
+        </div>
     </div>
 </div>

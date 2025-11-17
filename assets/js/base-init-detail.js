@@ -5,14 +5,23 @@ var initDetail = function (self) {
   self.formName;
   self.column;
   self.columnDefs;
+  self.buttons;
   self.action;
   self.id;
 
   self.createModel = (data) => {
     return {};
   };
-
-  self.bindingModel = (model) => {};
+  self.buttons = [
+    {
+      text: "Thêm mới",
+      className: "btn-danger",
+      action: function (e, dt, node, config) {
+        self.new(e);
+      },
+    },
+  ];
+  self.bindingModel = (model) => { };
 
   self.getData = () => {
     let items = [];
@@ -58,7 +67,7 @@ var initDetail = function (self) {
     });
   };
 
-  self.modalHide = (e) => {};
+  self.modalHide = (e) => { };
   self.saveClose = () => {
     self.save(true);
   };
@@ -125,15 +134,7 @@ var initDetail = function (self) {
       fixedColumns: {
         right: 1,
       },
-      buttons: [
-        {
-          text: "Thêm mới",
-          className: "btn-danger",
-          action: function (e, dt, node, config) {
-            self.new(e);
-          },
-        },
-      ],
+      buttons: self.buttons,
       dom:
         "<'row'<'col-sm-12 col-md-6'B><'col-sm-12 col-md-6'f>>" +
         "<'row'<'col-sm-12'tr>>" +

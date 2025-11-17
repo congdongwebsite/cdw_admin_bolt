@@ -423,6 +423,7 @@ var newCustomer = (function (
   emails.formName = "#modal-add-email-form";
   emails.column = [
     { data: "email-type_label", title: "Gói" },
+    { data: "domain", title: "Domain" },
     { data: "buy_date", title: "Thời gian mua" },
     { data: "expiry_date", title: "Thời gian hết hạn" },
     { data: "price", title: "Giá" },
@@ -433,11 +434,11 @@ var newCustomer = (function (
   ];
   emails.columnDefs = [
     {
-      targets: 3,
+      targets: 4,
       render: numberFormatterAmountVND,
     },
     {
-      targets: [1, 2],
+      targets: [2, 3],
       render: dateFormatter,
     },
   ];
@@ -451,6 +452,7 @@ var newCustomer = (function (
   emails.createModel = (data) => {
     return {
       id: data ? data.id : "",
+      domain: $("#domain", emails.modalName).val(),
       url_admin: $("#url_admin", emails.modalName).val(),
       url_client: $("#url_client", emails.modalName).val(),
       user: $("#user", emails.modalName).val(),
@@ -467,6 +469,7 @@ var newCustomer = (function (
     };
   };
   emails.bindingModel = (model) => {
+    $("#domain", emails.modalName).val(model.domain);
     $("#url_admin", emails.modalName).val(model.url_admin);
     $("#url_client", emails.modalName).val(model.url_client);
     $("#user", emails.modalName).val(model.user);
@@ -491,6 +494,7 @@ var newCustomer = (function (
     emails.api.data().each(function (row, index) {
       let item = {
         id: row.id,
+        domain: row.domain,
         url_admin: row.url_admin,
         url_client: row.url_client,
         user: row.user,
@@ -512,6 +516,9 @@ var newCustomer = (function (
   base.save = (e) => {
     if (!base.form.parsley().validate()) return;
     var form_data = getFormData(base.action, base.security, base.form);
+
+    form_data['dvhc-tp-label'] = $('#dvhc-tp option:selected', base.form).text();
+    form_data['dvhc-px-label'] = $('#dvhc-px option:selected', base.form).text();
 
     form_data["hostings"] = hostings.getData();
     form_data["domains"] = domains.getData();
@@ -746,9 +753,18 @@ var newCustomer = (function (
       initdatepickerlink("buy-date", "expiry-date", emails.modalName);
       initSelect2BillingStatus("status", billings.modalName);
 
-      initSelect2DVHCTPQHXP("dvhc-tp", base.form, "dvhc-qh", "dvhc-px");
+      initSelect2DVHCTPWard_iNET("dvhc-tp", base.form, "dvhc-px");
+      $('#dvhc-tp', base.form).on('change', function(){
+          var selectedText = $(this).find('option:selected').text();
+          $('#dvhc-tp-label', base.form).val(selectedText);
+      });
+      $('#dvhc-px', base.form).on('change', function(){
+          var selectedText = $(this).find('option:selected').text();
+          $('#dvhc-px-label', base.form).val(selectedText);
+      });
       initSelect2Hosting("type", hostings.modalName);
       initSelect2Email("email-type", emails.modalName);
+      $(".datepicker").datepicker();
 
       imagesContainer.lightGallery({
         thumbnail: true,

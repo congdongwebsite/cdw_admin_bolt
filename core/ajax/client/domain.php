@@ -8,6 +8,8 @@ class AjaxClientDomain
         add_action('wp_ajax_ajax_search-domain-client-cart',  array($this, 'func_search'));
         add_action('wp_ajax_ajax_search-per-domain-client-cart',  array($this, 'func_search_per'));
         add_action('wp_ajax_ajax_info-domain',  array($this, 'func_info_domain'));
+        add_action('wp_ajax_ajax_client_domain_privacy_protection', array($this, 'func_client_domain_privacy_protection'));
+        add_action('wp_ajax_ajax_client_domain_unprivacy_protection', array($this, 'func_client_domain_unprivacy_protection'));
 
 
         add_action('wp_ajax_ajax_search-domain-frontend-client-cart',  array($this, 'func_domain_check_search'));
@@ -35,7 +37,7 @@ class AjaxClientDomain
         // First check the nonce, if it fails the function will break
         check_ajax_referer('ajax-client-domain-nonce', 'security');
 
-        $columns = ['url', 'price', 'buy_date', 'expiry_date', 'url_dns', 'ip'];
+        $columns = ['url', 'price', 'buy_date', 'expiry_date', 'url_dns', 'ip', 'inet_domain_id'];
         $fieldSearch = ['url', 'price', 'buy_date', 'expiry_date', 'url_dns', 'ip'];
 
         $userC = wp_get_current_user();
@@ -197,6 +199,9 @@ class AjaxClientDomain
             $item['action'] = '';
             $item['urlUpdateDNS'] = $CDWFunc->getUrl('domain', 'client', 'subaction=update-dns&id=' . $post->ID);
             $item['urlUpdateRecord'] = $CDWFunc->getUrl('domain', 'client', 'subaction=update-record&id=' . $post->ID);
+
+            $item['privacy_protection_status'] = get_post_meta($post->ID, 'privacy_protection_status', true);
+
             $data[] = $item;
         }
 
@@ -305,19 +310,20 @@ class AjaxClientDomain
         $apiInet->setToken(APIINETTOKEN);
 
         $status_domain = $apiInet->checkDomainAvailability($item->domain, "");
-        if ($status_domain->success) {
+        
+        if ($status_domain['success']) {
 
-            if (isset($status_domain->data["code"])) {
-                switch ($status_domain->data["code"]) {
+            if (isset($status_domain['data']["code"])) {
+                switch ($status_domain['data']["code"]) {
                     case "1":
-                        $item->status = $status_domain->data["message"];
+                        $item->status = $status_domain['data']["message"];
                         $item->available = 'notfound';
                         break;
                 }
             } else {
-                if ($status_domain->data["status"] != "available") {
+                if ($status_domain['data']["status"] != "available") {
                     $whois = $apiInet->getDomainWhois($item->domain);
-                    $item->available = $status_domain->data["status"];
+                    $item->available = $status_domain['data']["status"];
                     if ($whois->success) {
                         switch ($whois->data["code"]) {
                             case "0":
@@ -337,7 +343,7 @@ class AjaxClientDomain
                 }
             }
         } else {
-            $item->status = "Lỗi trong quá trình tra cứu";
+            $item->status = "Lỗi trong quá trình tra cứu 2";
         }
         if ($item->available != 'notavailable') {
             $exists_system = $this->func_check_domain_exists($item->domain);
@@ -386,6 +392,7 @@ class AjaxClientDomain
         $apiInet->setToken(APIINETTOKEN);
 
         $whois = $apiInet->getDomainWhois($domain_remove->full);
+        
         if ($whois->success) {
             switch ($whois->data["code"]) {
                 case "0":
@@ -423,6 +430,56 @@ class AjaxClientDomain
         wp_send_json_success(["info" => $info, "template" => "info-domain-template"]);
 
         wp_send_json_error(['msg' => 'Lỗi']);
+        wp_die();
+    }
+
+    public function func_client_domain_privacy_protection()
+    {
+        global $CDWFunc;
+        check_ajax_referer('ajax-client-domain-nonce', 'security');
+
+        $domain_id = isset($_POST['id']) ? $_POST['id'] : '';
+        if (empty($domain_id)) {
+            wp_send_json_error(['msg' => 'Thiếu ID tên miền.']);
+        }
+
+        $inet_domain_id = get_post_meta($domain_id, 'inet_domain_id', true);
+        if (empty($inet_domain_id)) {
+            wp_send_json_error(['msg' => 'Tên miền chưa được đăng ký trên iNET.']);
+        }
+
+        $response = $CDWFunc->inet->privacyProtection($inet_domain_id);
+        if ($response['success']) {
+            update_post_meta($domain_id, 'privacy_protection_status', $response['data']['privacyProtection']);
+            wp_send_json_success(['msg' => 'Bật bảo vệ quyền riêng tư thành công.']);
+        } else {
+            wp_send_json_error(['msg' => $response['msg'] ?? 'Lỗi khi bật bảo vệ quyền riêng tư.']);
+        }
+        wp_die();
+    }
+
+    public function func_client_domain_unprivacy_protection()
+    {
+        global $CDWFunc;
+        check_ajax_referer('ajax-client-domain-nonce', 'security');
+
+        $domain_id = isset($_POST['id']) ? $_POST['id'] : '';
+        if (empty($domain_id)) {
+            wp_send_json_error(['msg' => 'Thiếu ID tên miền.']);
+        }
+
+        $inet_domain_id = get_post_meta($domain_id, 'inet_domain_id', true);
+        if (empty($inet_domain_id)) {
+            wp_send_json_error(['msg' => 'Tên miền chưa được đăng ký trên iNET.']);
+        }
+
+        $response = $CDWFunc->inet->unprivacyProtection($inet_domain_id);
+        if ($response['success']) {
+            update_post_meta($domain_id, 'privacy_protection_status', false);
+            wp_send_json_success(['msg' => 'Tắt bảo vệ quyền riêng tư thành công.']);
+        } else {
+            wp_send_json_error(['msg' => $response['msg'] ?? 'Lỗi khi tắt bảo vệ quyền riêng tư.']);
+        }
         wp_die();
     }
 
@@ -550,20 +607,20 @@ class AjaxClientDomain
         $apiInet->setToken(APIINETTOKEN);
 
         $status_domain = $apiInet->checkDomainAvailability($item->domain, "");
-        // var_dump($status_domain);
-        if ($status_domain->success) {
+        
+        if ($status_domain['success']) {
 
-            if (isset($status_domain->data["code"])) {
-                switch ($status_domain->data["code"]) {
+            if (isset($status_domain['data']["code"])) {
+                switch ($status_domain['data']["code"]) {
                     case "1":
-                        $item->status = $status_domain->data["message"];
+                        $item->status = $status_domain['data']["message"];
                         $item->available = 'notfound';
                         break;
                 }
             } else {
-                if ($status_domain->data["status"] != "available") {
+                if ($status_domain['data']["status"] != "available") {
                     $whois = $apiInet->getDomainWhois($item->domain);
-                    $item->available = $status_domain->data["status"];
+                    $item->available = $status_domain['data']["status"];
                     if ($whois->success) {
                         switch ($whois->data["code"]) {
                             case "0":

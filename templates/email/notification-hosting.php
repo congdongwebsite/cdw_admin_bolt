@@ -82,5 +82,5 @@ $vat = 10;
     </tr>
   </tbody>
 </table>
-<a class="botton-cdw" href="https://www.congdongweb.com/admin/" target="_blank">Đăng Nhập </a>
+<a class="botton-cdw" href="<?php echo $CDWFunc->getUrl('', '').'?urlredirect='.urlencode($CDWFunc->getUrl('hosting', 'client', ''));?>" target="_blank">Đăng Nhập </a>
 <p>Quý khách vui lòng phản hồi cho chúng tôi qua Ticket, Email: hotro@congdongweb.com hoặc theo Hotline (+84) 38.627.0225 trường hợp cần hỗ trợ thêm thông tin. Cảm ơn Quý khách!</p>

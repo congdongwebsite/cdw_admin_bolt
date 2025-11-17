@@ -189,25 +189,27 @@ class AjaxManageHosting
 
         if ($id) {
 
-            $gia = isset($_POST['gia']) ? $_POST['gia'] : '';
-            $gia_han = isset($_POST['gia_han']) ? $_POST['gia_han'] : '';
-            $note = isset($_POST['note']) ? $_POST['note'] : '';
-            $cpu = isset($_POST['cpu']) ? $_POST['cpu'] : '';
-            $ram = isset($_POST['ram']) ? $_POST['ram'] : '';
-            $hhd = isset($_POST['hhd']) ? $_POST['hhd'] : '';
-            $sub_title = isset($_POST['sub-title']) ? $_POST['sub-title'] : '';
-            $feature = isset($_POST['feature']) ? $_POST['feature'] : '';
-            $stt = isset($_POST['stt']) ? $_POST['stt'] : '';
+	        $gia       = isset( $_POST['gia'] ) ? $_POST['gia'] : '';
+	        $gia_han   = isset( $_POST['gia_han'] ) ? $_POST['gia_han'] : '';
+	        $note      = isset( $_POST['note'] ) ? $_POST['note'] : '';
+	        $cpu       = isset( $_POST['cpu'] ) ? $_POST['cpu'] : '';
+	        $ram       = isset( $_POST['ram'] ) ? $_POST['ram'] : '';
+	        $hhd       = isset( $_POST['hhd'] ) ? $_POST['hhd'] : '';
+	        $sub_title = isset( $_POST['sub-title'] ) ? $_POST['sub-title'] : '';
+	        $feature   = isset( $_POST['feature'] ) ? $_POST['feature'] : '';
+	        $package   = isset( $_POST['package'] ) ? $_POST['package'] : '';
+	        $stt       = isset( $_POST['stt'] ) ? $_POST['stt'] : '';
 
-            update_post_meta($id, 'gia', $gia);
-            update_post_meta($id, 'gia_han', $gia_han);
-            update_post_meta($id, 'note', $note);
-            update_post_meta($id, 'cpu', $cpu);
-            update_post_meta($id, 'ram', $ram);
-            update_post_meta($id, 'hhd', $hhd);
-            update_post_meta($id, 'sub-title', $sub_title);
-            update_post_meta($id, 'feature', $feature);
-            update_post_meta($id, 'stt', $stt);
+	        update_post_meta( $id, 'gia', $gia );
+	        update_post_meta( $id, 'gia_han', $gia_han );
+	        update_post_meta( $id, 'note', $note );
+	        update_post_meta( $id, 'cpu', $cpu );
+	        update_post_meta( $id, 'ram', $ram );
+	        update_post_meta( $id, 'hhd', $hhd );
+	        update_post_meta( $id, 'sub-title', $sub_title );
+	        update_post_meta( $id, 'feature', $feature );
+	        update_post_meta( $id, 'package', $package );
+	        update_post_meta( $id, 'stt', $stt );
 
             //Detail
             $details = isset($_POST['details']) ? $_POST['details'] : [];

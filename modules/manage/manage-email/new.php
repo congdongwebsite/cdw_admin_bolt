@@ -19,10 +19,16 @@ $ids = get_posts($arr);
         </div>
         <div class="body">
             <div class="row clearfix">
-                <div class="col-lg-6 col-md-6 col-sm-6 col-12">
+                <div class="col-lg-4 col-md-6 col-sm-6 col-12">
                     <div class="form-group">
                         <label for="title" class="control-label">Tên</label>
                         <input type="text" id="title" name="title" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6 col-sm-6 col-12">
+                    <div class="form-group">
+                        <label for="inet_plan_id" class="control-label">iNET Plan</label>
+                        <select id="inet_plan_id" name="inet_plan_id" class="form-control"></select>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-3 col-6">

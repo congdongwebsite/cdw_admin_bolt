@@ -20,7 +20,7 @@ class ConstantAdmin
         wp_register_style('bootstrap', ADMIN_CHILD_THEME_URL_F . '/assets/vendor/bootstrap/css/bootstrap.min.css', array(), CDW_VERSION, 'all');
         wp_register_style('font-awesome', ADMIN_CHILD_THEME_URL_F . '/assets/vendor/font-awesome/css/font-awesome.min.css', array(), CDW_VERSION, 'all');
         wp_register_style('datatables', ADMIN_CHILD_THEME_URL_F . '/assets/vendor/datatables/datatables.min.css', array(), CDW_VERSION, 'all');
-        wp_register_style('sweetalert2', ADMIN_CHILD_THEME_URL_F . '/assets/vendor/sweetalert2/css/sweetalert2.bundle.css', array(), CDW_VERSION, 'all');
+        wp_register_style('sweetalert2', ADMIN_CHILD_THEME_URL_F . '/assets/vendor/sweetalert2/css/sweetalert2.min.css', array(), CDW_VERSION, 'all');
         wp_register_style('bootstrap-datepicker', ADMIN_CHILD_THEME_URL_F . '/assets/vendor/bootstrap-datepicker/css/bootstrap-datepicker.css', array(), CDW_VERSION, 'all');
         wp_register_style('bootstrap-datetimepicker', ADMIN_CHILD_THEME_URL_F . '/assets/vendor/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css', array(), CDW_VERSION, 'all');
         wp_register_style('select2', ADMIN_CHILD_THEME_URL_F . '/assets/vendor/select2/css/select2.min.css', array(), CDW_VERSION, 'all');
@@ -56,7 +56,7 @@ class ConstantAdmin
         wp_register_script('accounting', ADMIN_CHILD_THEME_URL_F . '/assets/vendor/accountingjs/accounting.min.js', ['jquery'], CDW_VERSION);
         wp_register_script('moment', ADMIN_CHILD_THEME_URL_F . '/assets/vendor/moment/moment.js', ['jquery'], CDW_VERSION);
         wp_register_script('datatables', ADMIN_CHILD_THEME_URL_F . '/assets/vendor/datatables/datatables.min.js', ['jquery'], CDW_VERSION);
-        wp_register_script('sweetalert2', ADMIN_CHILD_THEME_URL_F . '/assets/vendor/sweetalert2/js/sweetalert2.bundle.js', ['jquery'], CDW_VERSION);
+        wp_register_script('sweetalert2', ADMIN_CHILD_THEME_URL_F . '/assets/vendor/sweetalert2/js/sweetalert2.min.js', ['jquery'], CDW_VERSION);
         wp_register_script('bootstrap-datepicker', ADMIN_CHILD_THEME_URL_F . '/assets/vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js', ['jquery'], CDW_VERSION);
         wp_register_script('bootstrap-datepicker-locales-vi', ADMIN_CHILD_THEME_URL_F . '/assets/vendor/bootstrap-datepicker/locales/bootstrap-datepicker.vi.min.js', ['jquery'], CDW_VERSION);
         wp_register_script('bootstrap-datetimepicker', ADMIN_CHILD_THEME_URL_F . '/assets/vendor/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js', ['jquery'], CDW_VERSION);

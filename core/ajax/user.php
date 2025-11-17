@@ -4,6 +4,7 @@ class UserAdmin
 {
     public function __construct()
     {
+        add_action('wp_ajax_ajax_frontend_login', array($this, 'func_login'));
         add_action('wp_ajax_nopriv_ajax_frontend_login', array($this, 'func_login'));
         add_action('wp_ajax_nopriv_ajax_frontend_register', array($this, 'func_register'));
     }
@@ -58,10 +59,9 @@ class UserAdmin
             add_user_meta($user_id, 'phone',  $phone);
             add_user_meta($user_id, 'address', $address);
             $tp =  isset($_POST['tp']) ? $_POST['tp'] : '';
-            $qh =  isset($_POST['qh']) ? $_POST['qh'] : '';
             $px =  isset($_POST['px']) ? $_POST['px'] : '';
 
-            $this->func_new_customer($user_id, $info['first_name'], $phone,  $info['user_email'], $address, $tp, $qh, $px);
+            $this->func_new_customer($user_id, $info['first_name'], $phone,  $info['user_email'], $address, $tp, $px);
             $creds = array(
                 'user_login'    => $info['nickname'],
                 'user_password' => $info['user_pass'],
@@ -103,7 +103,7 @@ class UserAdmin
 
         return count($id_customers) !== 0;
     }
-    public function func_new_customer($user_id, $name, $phone, $email, $address, $tp, $qh, $px)
+    public function func_new_customer($user_id, $name, $phone, $email, $address, $tp, $px)
     {
 
         $arr = array(
@@ -138,7 +138,6 @@ class UserAdmin
             update_post_meta($id, 'phone', $phone);
             update_post_meta($id, 'email', $email);
             update_post_meta($id, 'dvhc_tp', $tp);
-            update_post_meta($id, 'dvhc_qh', $qh);
             update_post_meta($id, 'dvhc_px', $px);
             update_post_meta($id, 'address', $address);
 
@@ -150,7 +149,7 @@ class UserAdmin
     public function func_login()
     {
         global $CDWFunc;
-        check_ajax_referer('ajax-login-nonce', 'security');
+        // check_ajax_referer('ajax-login-nonce', 'security');
         $urlRedirect = sanitize_text_field($_POST['urlRedirect']);
         $creds = array(
             'user_login'    => $_POST['username'],

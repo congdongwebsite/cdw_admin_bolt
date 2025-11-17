@@ -316,6 +316,36 @@ class FunctionEmail
             $this->sendHtmlEmail($customer->email, $subject, $htmlBody, $customer->name);
         }
     }
+    public function sendEmailNotificationAllService($ids)
+    {
+        global $CDWFunc;
+        foreach ($ids as $id) {
+            $customer_id = get_post_meta($id, 'customer-id', true);
+            if (isset($customers[$customer_id])) {
+                $customers[$customer_id]->ids[] = $id;
+            } else {
+                $item = new stdClass();
+                $item->customer_id =  $customer_id;
+                $item->user_id =  get_post_meta($item->customer_id, 'user-id', true);
+                $item->user_data = $CDWFunc->wpdb->get_info_user($item->user_id);
+                $item->email = get_post_meta($item->customer_id, 'email', true);
+                $item->name = get_post_meta($item->customer_id, 'name', true);
+                $item->ids[] = $id;
+                $customers[$customer_id] = $item;
+            }
+        }
+
+        foreach ($customers as $customer) {
+            if (empty($customer->email)) continue;
+            $subject = "Thông Báo Dịch Vụ Sắp Hết Hạn - Cộng Đồng Web";
+            $arg['ids'] = $customer->ids;
+            $arg['customer-id'] = $customer->customer_id;
+            $arg['title'] = "THÔNG BÁO DỊCH VỤ CỦA BẠN SẮP HẾT HẠN";
+            $htmlBody =  $this->get_templete_email('notification-all-service', $arg);
+
+            $this->sendHtmlEmail($customer->email, $subject, $htmlBody, $customer->name);
+        }
+    }
     public function sendEmailNotificationEmail($ids)
     {
         global $CDWFunc;
@@ -356,6 +386,29 @@ class FunctionEmail
         $arg['title'] = "ĐỔI MẬT KHẨU";
         $htmlBody =  $this->get_templete_email('user-forgot-password', $arg);
         return $this->sendHtmlEmail($user_data->email, $subject, $htmlBody, $user_data->name);
+    }
+
+    public function sendEmailKYCRejected($customer_id, $reason)
+    {
+        global $CDWFunc;
+        $email = get_post_meta($customer_id, 'email', true);
+        $name = get_post_meta($customer_id, 'name', true);
+        $subject = "Thông Báo Về Việc Xác Thực Tài Khoản (KYC) - Cộng Đồng Web";
+        $arg['reason'] = $reason;
+        $arg['customer_id'] = $customer_id;
+        $arg['title'] = "XÁC THỰC TÀI KHOẢN KHÔNG THÀNH CÔNG";
+        $htmlBody =  $this->get_templete_email('kyc-rejected', $arg);
+        return $this->sendHtmlEmail($email, $subject, $htmlBody, $name);
+    }
+
+    public function sendAdminNotificationCustomerUpdate($customer_id)
+    {
+        $to = SMPT_USERNAME;
+        $subject = '[CongDongWeb] Khách hàng đã cập nhật thông tin KYC';
+        $arg['customer-id'] = $customer_id;
+        $arg['title'] = 'KHÁCH HÀNG CẬP NHẬT THÔNG TIN KYC';
+        $body = $this->get_templete_email('admin-customer-info-updated', $arg);
+        return $this->sendHtmlEmail($to, $subject, $body, 'Admin');
     }
 
 

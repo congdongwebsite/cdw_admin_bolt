@@ -20,11 +20,11 @@ var manageEmail = (function (self, base) {
   ];
   base.columnDefs = [
     {
-      targets: 1,
+      targets: 0,
       render: drillDownFormatter,
     },
     {
-      targets: [2, 3],
+      targets: [1,2],
       render: numberFormatterAmountVND,
     },
   ];

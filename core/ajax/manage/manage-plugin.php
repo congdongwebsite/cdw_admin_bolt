@@ -7,7 +7,6 @@ class AjaxManagePlugin
     {
         add_action('wp_ajax_ajax_get-list-manage-plugin',  array($this, 'func_get_list'));
         add_action('wp_ajax_ajax_delete-list-manage-plugin',  array($this, 'func_delete_list'));
-        add_action('wp_ajax_ajax_create-user-manage-plugin',  array($this, 'func_create_user'));
         add_action('wp_ajax_ajax_new-manage-plugin',  array($this, 'func_new'));
         add_action('wp_ajax_ajax_new-image-manage-plugin',  array($this, 'func_new_image'));
         add_action('wp_ajax_ajax_new-thumbnail-manage-plugin',  array($this, 'func_new_thumbnail'));
@@ -59,6 +58,7 @@ class AjaxManagePlugin
             $name = get_post_meta($post->ID, 'name', true);
             $sub_domain = get_post_meta($post->ID, 'sub_domain', true);
             $price = get_post_meta($post->ID, 'price', true);
+            $code = get_post_meta($post->ID, 'code', true);
             $module_version = get_post_meta($post->ID, 'module_id', true);
             $module_version_name = get_post_meta($module_version, 'name', true);
             $type = wp_get_post_terms($post->ID, 'plugin-type', array('fields' => 'names'));;
@@ -77,6 +77,7 @@ class AjaxManagePlugin
                 'type' => implode(",", $type),
                 'url' => $sub_domain,
                 'price' => $price,
+                'code' => $code,
 
             ];
         }
@@ -95,6 +96,27 @@ class AjaxManagePlugin
 
         if (!post_type_exists($this->postType)) {
             wp_send_json_error(['msg' => 'Không tìm thấy loại bài đăng: ' . $this->postType]);
+        }
+
+        $code = isset($_POST['code']) ? trim($_POST['code']) : '';
+        if (!empty($code)) {
+            $args = array(
+                'post_type' => $this->postType,
+                'post_status' => 'publish',
+                'meta_query' => array(
+                    array(
+                        'key' => 'code',
+                        'value' => $code,
+                        'compare' => '='
+                    )
+                ),
+                'posts_per_page' => 1,
+                'fields' => 'ids',
+            );
+            $existing_plugins = get_posts($args);
+            if (!empty($existing_plugins)) {
+                wp_send_json_error(['msg' => 'Plugin với mã này đã tồn tại.']);
+            }
         }
 
         $type = isset($_POST['type']) ? $_POST['type'] : '';
@@ -119,6 +141,7 @@ class AjaxManagePlugin
             $module_version = isset($_POST['module_version']) ? $_POST['module_version'] : '';
 
             add_post_meta($id, 'name', $name);
+            add_post_meta($id, 'code', $code);
             add_post_meta($id, 'sub_domain', $sub_domain);
             add_post_meta($id, 'price', $price);
             add_post_meta($id, 'module_id', $module_version);
@@ -267,11 +290,13 @@ class AjaxManagePlugin
         if ($id) {
 
             $name = isset($_POST['name']) ? $_POST['name'] : '';
+            // $code = isset($_POST['code']) ? $_POST['code'] : '';
             $sub_domain = isset($_POST['sub_domain']) ? $_POST['sub_domain'] : '';
             $price = isset($_POST['price']) ? $_POST['price'] : '';
             $module_version = isset($_POST['module_version']) ? $_POST['module_version'] : '';
 
             update_post_meta($id, 'name', $name);
+            // update_post_meta($id, 'code', $code);
             update_post_meta($id, 'sub_domain', $sub_domain);
             update_post_meta($id, 'price', $price);
             update_post_meta($id, 'module_id', $module_version);

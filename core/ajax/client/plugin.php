@@ -101,13 +101,15 @@ class AjaxClientPlugin
         $data = [];
         foreach ($posts as $post) {
             $plugin_type = get_post_meta($post->ID, 'plugin-type', true);
+            $plugin_code = get_post_meta($plugin_type, 'code', true);
+            $license = get_post_meta($post->ID, 'license', true);
+            $license_info = cdw_get_license_info($license, $plugin_code);
             $urlredirect = $CDWFunc->getUrl('detail', 'manage-plugin', 'id=' . $plugin_type);
             $item = [];
             $item['id'] = $post->ID;
             $title = get_the_title($plugin_type);
             $info = get_post_meta($post->ID, 'name', true);
             $price = get_post_meta($post->ID, 'price', true);
-            $license = get_post_meta($post->ID, 'license', true);
             $date = get_post_meta($post->ID, 'date', true);
             $expiry_date = get_post_meta($post->ID, 'expiry_date', true);
 
@@ -121,7 +123,8 @@ class AjaxClientPlugin
             $item['info'] = $info;
             $item['date'] = $date;
             $item['expiry_date'] = $expiry_date;
-            $item['license'] = $license;
+            $item['license'] = $license_info['key'];
+            $item['version'] = $license_info['version'];
             $item['price'] = $price;
 
             $data[] = $item;

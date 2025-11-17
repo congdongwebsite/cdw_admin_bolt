@@ -7,14 +7,14 @@ $total = 0;
 $vat = 10;
 ?>
 <p>Kính gửi: <strong><?php echo $name; ?></strong></p>
-<p>Chào Quý khách, Hosting của bạn <b>Sắp Hết Hạn</b> và đã được đưa vào trạng thái chờ xử lý.</p>
+<p>Chào Quý khách, Email của bạn <b>Sắp Hết Hạn</b> và đã được đưa vào trạng thái chờ xử lý.</p>
 
 
 <table class="order" cellspacing="0" cellpadding="0">
   <thead>
     <tr>
       <th class="center">Thông Tin Gói</th>
-      <th class="center">Thông Tin Hosting</th>
+      <th class="center">Thông Tin Email</th>
       <th class="center">Gia Hạn</th>
       <th class="center">Giá Tiền</th>
 
@@ -23,13 +23,10 @@ $vat = 10;
   <tbody>
     <?php 
        foreach ($ids as $id) {
-        $hosting = get_post_meta($id, "type", true);
+        $email = get_post_meta($id, "email-type", true);
         $buy_date = get_post_meta($id, "buy_date", true);
         $expiry_date = get_post_meta($id, "expiry_date", true);
-        $ip_hosting = get_post_meta($id, "ip", true);
-        $ip_cpu = get_post_meta($hosting, "cpu", true);
-        $ip_ram = get_post_meta($hosting, "ram", true);
-        $ip_ssd = get_post_meta($hosting, "hhd", true);
+        $email_label = get_the_title($email);
         $price =  get_post_meta($id, "price", true);
         $total += $price;
         
@@ -39,9 +36,9 @@ $vat = 10;
     ?>
       <tr>
         <td>
-          <?php echo get_the_title($hosting); ?><br><small>Ngày đăng ký: <b>   <?php echo $buy_date; ?> </b></small><br><small>Ngày hết hạn <b> <?php echo $expiry_date; ?></b></small>
+          <?php echo $email_label; ?><br><small>Ngày đăng ký: <b>   <?php echo $buy_date; ?> </b></small><br><small>Ngày hết hạn <b> <?php echo $expiry_date; ?></b></small>
         </td>
-        <td><b>IP: </b><?php echo $ip_hosting; ?><br><small>CPU: <?php echo $ip_cpu; ?> - Ram: <?php echo $ip_ram; ?> - SSD: <?php echo $ip_ssd; ?></small></td>
+        <td></td>
         <td class="center">1 Năm</td>
         <td class="right"><?php echo $price; ?></td>
       </tr>
@@ -66,7 +63,7 @@ $vat = 10;
     </tr>
   </tbody>
 </table>
-<p>Cộng Đồng Web thông báo Hosting của bạn sắp hết hạn, để quá trình hệ thống sử dụng không bị ngắt quãng mong bạn có thể đăng nhập vào quản trị để duy trì và gia hạn hoá đơn trên trong thời gian sớm nhất.</p>
+<p>Cộng Đồng Web thông báo Email của bạn sắp hết hạn, để quá trình hệ thống sử dụng không bị ngắt quãng mong bạn có thể đăng nhập vào quản trị để duy trì và gia hạn hoá đơn trên trong thời gian sớm nhất.</p>
 <table style="margin-bottom: 10px;">
   <thead>
     <tr>
@@ -82,5 +79,5 @@ $vat = 10;
     </tr>
   </tbody>
 </table>
-<a class="botton-cdw" href="https://www.congdongweb.com/admin/" target="_blank">Đăng Nhập </a>
+<a class="botton-cdw" href="<?php echo $CDWFunc->getUrl('', '').'?urlredirect='.urlencode($CDWFunc->getUrl('email', 'client', ''));?>" target="_blank">Đăng Nhập </a>
 <p>Quý khách vui lòng phản hồi cho chúng tôi qua Ticket, Email: hotro@congdongweb.com hoặc theo Hotline (+84) 38.627.0225 trường hợp cần hỗ trợ thêm thông tin. Cảm ơn Quý khách!</p>

@@ -109,6 +109,7 @@ var plugin = (function (self, base) {
     { data: "title", title: "Tiêu đề" },
     { data: "license", title: "Giấy phép" },
     { data: "info", title: "Thông tin" },
+    { data: "version", title: "Version" },
     { data: "price", title: "Giá" },
   ];
   base.columnDefs = [
@@ -125,7 +126,7 @@ var plugin = (function (self, base) {
       render: imageFormatter,
     },
     {
-      targets: 6,
+      targets: 7,
       render: numberFormatterAmountVND,
     },
   ];

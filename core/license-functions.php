@@ -32,10 +32,10 @@ add_action('rest_api_init', 'license_api_init');
 function verify_license_key($request)
 {
     $license_key = $request->get_param('license_key');
-    $plugin_id = $request->get_param('plugin_id');
+    $plugin_code = $request->get_param('plugin_code');
     $current_version = $request->get_param('version');
 
-    if (empty($license_key) || empty($plugin_id)) {
+    if (empty($license_key) || empty($plugin_code)) {
         return new WP_Error('missing_params', 'Missing parameters', array('status' => 400));
     }
 
@@ -88,19 +88,43 @@ function get_license_by_code($code)
     return $licenses[0];
 }
 
+function cdw_get_plugin_id_by_code($plugin_code)
+{
+    if (empty($plugin_code)) {
+        return null;
+    }
+    $args = array(
+        'post_type'  => 'plugin',
+        'posts_per_page' => 1,
+        'meta_query' => array(
+            array(
+                'key'     => 'code',
+                'value'   => $plugin_code,
+                'compare' => '=',
+            ),
+        ),
+        'fields' => 'ids'
+    );
+    $plugins = get_posts($args);
+    if (empty($plugins)) {
+        return null;
+    }
+    return $plugins[0];
+}
+
 function cdw_plugin_connect_callback($request)
 {
     $license_key = $request->get_param('license_key');
-    $plugin_id = $request->get_param('plugin_id');
+    $plugin_code = $request->get_param('plugin_code');
 
-    if (empty($license_key) || empty($plugin_id)) {
-        return new WP_Error('missing_params', 'Missing license key or plugin ID', array('status' => 400));
+    if (empty($license_key) || empty($plugin_code)) {
+        return new WP_Error('missing_params', 'Missing license key or plugin code', array('status' => 400));
     }
 
-    $license_info = cdw_get_license_info($license_key, $plugin_id);
+    $license_info = cdw_get_license_info($license_key, $plugin_code);
 
     if (empty($license_info) || $license_info['status'] !== 'active') {
-        return new WP_Error('invalid_license', 'Invalid license key or plugin ID', array('status' => 403));
+        return new WP_Error('invalid_license', 'Invalid license key or plugin code', array('status' => 403));
     }
 
     return new WP_REST_Response(array(
@@ -111,15 +135,15 @@ function cdw_plugin_connect_callback($request)
 
 function cdw_plugin_update_check_callback($request)
 {
-    $plugin_id = $request->get_param('plugin_id');
+    $plugin_code = $request->get_param('plugin_code');
     $license_key = $request->get_param('license_key');
     $current_version = $request->get_param('version');
 
-    if (empty($plugin_id) || empty($license_key) || empty($current_version)) {
-        return new WP_Error('missing_params', 'Missing plugin ID, license key, or current version', array('status' => 400));
+    if (empty($plugin_code) || empty($license_key) || empty($current_version)) {
+        return new WP_Error('missing_params', 'Missing plugin code, license key, or current version', array('status' => 400));
     }
 
-    $license_info = cdw_get_license_info($license_key, $plugin_id);
+    $license_info = cdw_get_license_info($license_key, $plugin_code);
 
     if (empty($license_info) || $license_info['status'] !== 'active') {
         return new WP_Error('invalid_license', 'Invalid or inactive license', array('status' => 403));
@@ -142,17 +166,22 @@ function cdw_plugin_update_check_callback($request)
 function cdw_plugin_info_callback($request)
 {
     $license_key = $request->get_param('license_key');
-    $plugin_id = $request->get_param('plugin_id');
+    $plugin_code = $request->get_param('plugin_code');
     $slug = $request->get_param('slug');
 
-    if (empty($license_key) || empty($plugin_id) || empty($slug)) {
-        return new WP_Error('missing_params', 'Missing license key, plugin ID, or slug', array('status' => 400));
+    if (empty($license_key) || empty($plugin_code) || empty($slug)) {
+        return new WP_Error('missing_params', 'Missing license key, plugin code, or slug', array('status' => 400));
     }
 
-    $license_info = cdw_get_license_info($license_key, $plugin_id);
+    $license_info = cdw_get_license_info($license_key, $plugin_code);
 
     if (empty($license_info) || $license_info['status'] !== 'active') {
         return new WP_Error('invalid_license', 'Invalid or inactive license', array('status' => 403));
+    }
+
+    $plugin_id = cdw_get_plugin_id_by_code($plugin_code);
+    if (!$plugin_id) {
+        return new WP_Error('plugin_not_found', 'Plugin not found for the given code', array('status' => 404));
     }
 
     $plugin_post = get_post($plugin_id);
@@ -192,7 +221,7 @@ function generate_unique_license_key()
     return $license_key;
 }
 
-function cdw_get_license_info($license_key, $plugin_id)
+function cdw_get_license_info($license_key, $plugin_code)
 {
     $args = array(
         'post_type'  => 'license',
@@ -205,8 +234,8 @@ function cdw_get_license_info($license_key, $plugin_id)
                 'compare' => '=',
             ),
             array(
-                'key'     => '_plugin_id',
-                'value'   => $plugin_id,
+                'key'     => '_plugin_code',
+                'value'   => $plugin_code,
                 'compare' => '=',
             ),
         ),
@@ -219,18 +248,17 @@ function cdw_get_license_info($license_key, $plugin_id)
     }
 
     $license = $licenses[0];
-    $plugin = get_post($plugin_id);
 
     $license_info = array(
         'id'          => $license->ID,
         'title'       => $license->post_title,
         'key'         => get_post_meta($license->ID, '_license_key', true),
-        'plugin_id'   => get_post_meta($license->ID, '_plugin_id', true),
-        'plugin_name' => $plugin ? $plugin->post_title : 'N/A',
+        'plugin_code'   => get_post_meta($license->ID, '_plugin_code', true),
+        'plugin_name'   => get_post_meta($license->ID, '_plugin_name', true),
         'type'        => get_post_meta($license->ID, '_license_type', true),
         'starts_at'   => get_post_meta($license->ID, '_starts_at', true),
         'expires_at'  => get_post_meta($license->ID, '_expires_at', true),
-        'status'      => $plugin ? get_post_meta($license->ID, '_status', true) : false,
+        'status'      => get_post_meta($license->ID, '_status', true),
         'version'     => get_post_meta($license->ID, '_version', true),
         'version_url' => get_post_meta($license->ID, '_version_url', true),
     );
@@ -296,9 +324,17 @@ function cdw_create_license($plugin_id, $license_type = 'free', $duration = 'fre
         $expires_at = date('Y-m-d', strtotime("+$duration", strtotime($starts_at)));
     }
 
+    $plugin = get_post($plugin_id);
+    if (!$plugin) return false;
+    
+    $plugin_code = get_post_meta($plugin_id, 'code', true);
+    if (empty($plugin_code)) {
+        return new WP_Error('plugin_missing_code', "Vui lòng cập nhật code cho plugin");
+    }
+
+    $plugin_name = $plugin ? $plugin->post_title . ' License' : 'License';
     if (empty($title)) {
-        $plugin = get_post($plugin_id);
-        $title = $plugin ? $plugin->post_title . ' License' : 'License';
+        $title = $plugin_name;
     }
 
     $post_data = array(
@@ -312,7 +348,7 @@ function cdw_create_license($plugin_id, $license_type = 'free', $duration = 'fre
     if (is_wp_error($license_id)) {
         return $license_id;
     }
-    if (empty($version) && $plugin_id > 0) {
+    if (empty($version)) {
         if (cdw_get_last_version($plugin_id)) {
             $version = cdw_get_last_version($plugin_id);
         }
@@ -320,7 +356,8 @@ function cdw_create_license($plugin_id, $license_type = 'free', $duration = 'fre
     if ($license_id) {
 
         update_post_meta($license_id, '_license_key', generate_unique_license_key());
-        update_post_meta($license_id, '_plugin_id', $plugin_id);
+        update_post_meta($license_id, '_plugin_code', $plugin_code);
+        update_post_meta($license_id, '_plugin_name', $plugin_name);
         update_post_meta($license_id, '_license_type', $license_type);
         update_post_meta($license_id, '_starts_at', $starts_at);
         update_post_meta($license_id, '_expires_at', $expires_at);
@@ -372,7 +409,9 @@ function cdw_handle_license_action()
             $licenses_query = get_posts(array('post_type' => 'license', 'posts_per_page' => -1));
             $licenses = array();
             foreach ($licenses_query as $license) {
-                $plugin_id = get_post_meta($license->ID, '_plugin_id', true);
+                $plugin_code = get_post_meta($license->ID, '_plugin_code', true);
+                $plugin_name = get_post_meta($license->ID, '_plugin_name', true);
+                $plugin_id = cdw_get_plugin_id_by_code($plugin_code);
                 $customer_id = get_post_meta($license->ID, '_customer_id', true);
                 $customer_name = get_post_meta($customer_id, 'name', true);
                 $starts_at = get_post_meta($license->ID, '_starts_at', true);
@@ -380,14 +419,14 @@ function cdw_handle_license_action()
                 $starts_at = $CDWFunc->date->convertDateTimeDisplay($starts_at);
                 $expires_at = $CDWFunc->date->convertDateTimeDisplay($expires_at);
 
-                $plugin = get_post($plugin_id);
                 $licenses[] = array(
                     'id' => $license->ID,
                     'title' => $license->post_title,
                     'key' => get_post_meta($license->ID, '_license_key', true),
                     'customer_name' => $customer_name ? $customer_name : 'N/A',
-                    'plugin_id' => $plugin ? $plugin->ID : 'N/A',
-                    'plugin_name' => $plugin ? $plugin->post_title : 'N/A',
+                    'plugin_id' => $plugin_id ? $plugin_id : 'N/A',
+                    'plugin_code' => $plugin_code,
+                    'plugin_name' => $plugin_name ? $plugin_name : 'N/A',
                     'type' => get_post_meta($license->ID, '_license_type', true),
                     'starts_at' => $starts_at,
                     'expires_at' => $expires_at,
@@ -402,6 +441,11 @@ function cdw_handle_license_action()
             $plugin_id = isset($_POST['plugin_id']) ? intval($_POST['plugin_id']) : 0;
             if ($plugin_id === 0) {
                 wp_send_json_error(array('message' => 'Module ID is missing.'));
+            }
+
+            $plugin_code = get_post_meta($plugin_id, 'code', true);
+            if (empty($plugin_code)) {
+                wp_send_json_error(array('msg' => "Vui lòng cập nhật code cho plugin"));
             }
 
             $module_id = get_post_meta($plugin_id, 'module_id', true);
@@ -439,10 +483,13 @@ function cdw_handle_license_action()
             $starts_at = get_post_meta($license->ID, '_starts_at', true);
             $expires_at = get_post_meta($license->ID, '_expires_at', true);
             $starts_at = $CDWFunc->date->convertDateTime($starts_at, $CDWFunc->date->formatDB, 'Y-m-d');
+            $plugin_code = get_post_meta($license->ID, '_plugin_code', true);
+            $plugin_id = cdw_get_plugin_id_by_code($plugin_code);
             $details = array(
                 'id' => $license->ID,
                 'title' => $license->post_title,
-                'plugin_id' => get_post_meta($license->ID, '_plugin_id', true),
+                'plugin_id' => $plugin_id,
+                'plugin_code' => $plugin_code,
                 'customer_id' => get_post_meta($license->ID, '_customer_id', true),
                 'type' => get_post_meta($license->ID, '_license_type', true),
                 'starts_at' => $starts_at,
@@ -499,6 +546,13 @@ function cdw_handle_license_action()
             $status = sanitize_text_field($_POST['status']);
             $version_detail_id = intval($_POST['version_detail_id']);
             $customer_id = isset($_POST['customer_id']) ? intval($_POST['customer_id']) : 0;
+
+            if ($plugin_id) {
+                $plugin_code_check = get_post_meta($plugin_id, 'code', true);
+                if (empty($plugin_code_check)) {
+                    wp_send_json_error(array('msg' => "Vui lòng cập nhật code cho plugin"));
+                }
+            }
 
             $version_string = '';
             if ($version_detail_id) {
@@ -581,7 +635,11 @@ function cdw_handle_license_action()
             }
 
             if ($license_id) {
-                update_post_meta($license_id, '_plugin_id', $plugin_id);
+                $plugin_code = get_post_meta($plugin_id, 'code', true);
+                $plugin = get_post($plugin_id);
+                $plugin_name = $plugin ? $plugin->post_title . ' License' : 'License';
+                update_post_meta($license_id, '_plugin_code', $plugin_code);
+                update_post_meta($license_id, '_plugin_name', $plugin_name);
                 update_post_meta($license_id, '_license_type', $license_type);
                 update_post_meta($license_id, '_starts_at', $starts_at);
                 update_post_meta($license_id, '_expires_at', $expires_at);
@@ -609,7 +667,8 @@ function cdw_get_version_id_by_string($license_id)
     $stored_version_string = get_post_meta($license->ID, '_version', true);
     $version_detail_id_for_form = '';
 
-    $plugin_id = get_post_meta($license->ID, '_plugin_id', true);
+    $plugin_code = get_post_meta($license->ID, '_plugin_code', true);
+    $plugin_id = cdw_get_plugin_id_by_code($plugin_code);
     $module_id = get_post_meta($plugin_id, 'module_id', true);
 
     if (!empty($stored_version_string)) {

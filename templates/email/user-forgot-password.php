@@ -32,7 +32,7 @@ $user_data = $CDWFunc->wpdb->get_info_user($user_id);
   <strong>Cảm ơn Quý khách đã sử dụng dịch vụ của Cộng Đồng Web!</strong><br />
   Thank you for using the service with congdongweb.com!
 </p>
-<a class="botton-cdw" style="    margin: auto;display: table;" href="https://www.congdongweb.com/admin/" target="_blank">Đăng Nhập
+<a class="botton-cdw" style="    margin: auto;display: table;" href="<?php echo $CDWFunc->getUrl('', ''); ?>" target="_blank">Đăng Nhập
 </a>
 <p>
   Quý khách vui lòng phản hồi cho chúng tôi qua Ticket, Email:

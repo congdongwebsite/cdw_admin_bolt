@@ -106,6 +106,7 @@ var detailManageEmail = (function (self, base, details) {
   self.initialize = () => {
     base.initialize();
     details.initialize();
+    initSelect2InetEmailPlans("inet_plan_id", base.form);
 
     [Gia, GiaHan] = AutoNumeric.multiple(
       [

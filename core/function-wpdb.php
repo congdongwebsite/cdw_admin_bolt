@@ -394,34 +394,25 @@ class FunctionWPDB
         if ($user == false) {
             return $result;
         }
-        $CDWFunc->getDataDVHC();
-        if ($CDWFunc->isAdministrator($user_id)) {
+        $result->customer_id = get_user_meta($user_id, 'customer-id', true);
+        $result->name = get_post_meta($result->customer_id, 'name', true);
+        $result->company = get_post_meta($result->customer_id, 'company_name', true);
+        $result->phone = get_post_meta($result->customer_id, 'phone', true);
+        $result->email = get_post_meta($result->customer_id, 'email', true);
+        $result->idtp = get_post_meta($result->customer_id, 'dvhc_tp', true);
+        $result->idqh = get_post_meta($result->customer_id, 'dvhc_qh', true);
+        $result->idpx = get_post_meta($result->customer_id, 'dvhc_px', true);
+        $result->idtp_label = get_post_meta($result->customer_id, 'dvhc_tp_label', true);
+        $result->idqh_label = get_post_meta($result->customer_id, 'dvhc_qh_label', true);
+        $result->idpx_label = get_post_meta($result->customer_id, 'dvhc_px_label', true);
+        $result->straddress = get_post_meta($result->customer_id, 'address', true);
+        $result->cmnd = get_post_meta($result->customer_id, 'cmnd', true);
 
-            $result->name = $user->first_name;
-            $result->phone = get_user_meta($user_id, 'phone', true);
-            $result->email = $user->user_email;
-            $result->idtp = get_user_meta($user_id, 'dvhc_tp', true);
-            $result->idqh = get_user_meta($user_id, 'dvhc_qh', true);
-            $result->idpx = get_user_meta($user_id, 'dvhc_px', true);
-            $result->straddress = get_user_meta($user_id, 'address', true);
-        } else {
-
-            $result->customer_id = get_user_meta($user_id, 'customer-id', true);
-            $result->name = get_post_meta($result->customer_id, 'name', true);
-            $result->company = get_post_meta($result->customer_id, 'company_name', true);
-            $result->phone = get_post_meta($result->customer_id, 'phone', true);
-            $result->email = get_post_meta($result->customer_id, 'email', true);
-            $result->idtp = get_post_meta($result->customer_id, 'dvhc_tp', true);
-            $result->idqh = get_post_meta($result->customer_id, 'dvhc_qh', true);
-            $result->idpx = get_post_meta($result->customer_id, 'dvhc_px', true);
-            $result->straddress = get_post_meta($result->customer_id, 'address', true);
-            $result->cmnd = get_post_meta($result->customer_id, 'cmnd', true);
-        }
         $result->id = $user_id;
         $result->username = $user->user_login;
         $result->useremail = $user->user_email;
-        $result->birthdate = get_user_meta($user_id, 'birthdate', true);
-        $result->gender = get_user_meta($user_id, 'gender', true);
+        $result->birthdate = get_post_meta($result->customer_id, 'birthdate', true);
+        $result->gender = get_post_meta($result->customer_id, 'gender', true);
         $result->website = get_user_meta($user_id, 'website', true);
         $result->avatar = get_user_meta($user_id, 'avatar-custom', true);
         if (empty($result->avatar))
@@ -429,7 +420,8 @@ class FunctionWPDB
         else
             $result->avatar = wp_get_attachment_image_url($result->avatar, 'large');
 
-        $result->address = $result->straddress . ", " . $CDWFunc->getPX($result->idpx) . ", " . $CDWFunc->getQH($result->idqh)  . ", " . $CDWFunc->getTP($result->idtp);
+        $result->address = [$result->straddress, $result->idpx_label, $result->idtp_label];
+        $result->address = implode(', ', $result->address);
         if (empty($result->company)) $result->company = $result->name;
         $result->roles = $user->roles;
         $result->role = '';

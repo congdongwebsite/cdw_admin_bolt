@@ -171,7 +171,7 @@ window.addEventListener("resize", () => {
 });
 $.extend($.fn.dataTable.defaults, {
   language: {
-    url: "https://www.congdongweb.com/wp-content/themes/CongDongTheme/templates/admin/assets/vendor/datatables/i18n/vi.json",
+    url: "/wp-content/themes/CongDongTheme/templates/admin/assets/vendor/datatables/i18n/vi.json",
   },
   pageLength: 25,
 });
@@ -501,7 +501,6 @@ function dateFormatter(data, type, row, meta) {
 }
 function dateBillingFormatter(data, type, row, meta) {
   if (!data) return data;
-console.log('siteSettings.formatDateBilling || siteSettings.formatDate',siteSettings.formatDateBilling, siteSettings.formatDate)
   let date = moment(data, dateFormat);
   return date.isValid()
     ? date.year() === 1900
@@ -516,6 +515,17 @@ function timeFormatter(data, type, row, meta) {
   return date.isValid() ? date.format("HH:mm") : data;
 }
 
+function initGeneratePassword() {
+  $("button.btn-change-pass").on("click", function () {
+    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    let pass = "";
+    for (let i = 0; i < 12; i++) {
+      pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    $("#modal-add-hosting-form input#pass").val(pass);
+  });
+}
 function bindDragScroll($container, $scroller) {
   var $window = $(window);
 

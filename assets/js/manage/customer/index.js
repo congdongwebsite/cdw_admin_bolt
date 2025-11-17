@@ -18,6 +18,55 @@ var customer = (function (self, base) {
         self.createUser();
       },
     },
+    {
+      text: '<i class="fa fa-sync" aria-hidden="true"></i>',
+      className: "btn-info d-none", // Hidden button as requested
+      action: function (e, dt, node, config) {
+        Swal.fire({
+          title: "Đồng bộ dữ liệu email từ iNET?",
+          text: "Quá trình này sẽ quét và cập nhật tất cả các dịch vụ email đã đăng ký trên iNET vào hệ thống. Việc này có thể mất vài phút.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Bắt đầu đồng bộ",
+          cancelButtonText: "Hủy",
+        }).then((res) => {
+          if (res.value) {
+            callAjaxLoading(
+              {
+                action: "ajax_sync_inet_emails",
+                security: base.security,
+              },
+              (response) => {
+                if (response.success) {
+                  let message = response.data.msg;
+                  if (
+                    response.data.errors &&
+                    response.data.errors.length > 0
+                  ) {
+                    const errorDetails = response.data.errors.join("<br>");
+                    message += `<br><br><div style="text-align:left; max-height: 200px; overflow-y:auto; padding: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px;"><strong>Chi tiết lỗi:</strong><br>${errorDetails}</div>`;
+                  }
+                  Swal.fire({
+                    title: "Đồng bộ hoàn tất!",
+                    html: message,
+                    icon: "success",
+                  });
+                  base.table.ajax.reload();
+                } else {
+                  showErrorMessage(
+                    response.data.msg || "Có lỗi không xác định xảy ra.",
+                    "Lỗi đồng bộ!"
+                  );
+                }
+              },
+              (msg) => {
+                showErrorMessage(msg);
+              }
+            );
+          }
+        });
+      },
+    },
   ];
   self.createUser = (e) => {
     let data = base.getSelectedRows();

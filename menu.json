@@ -633,6 +633,16 @@
     ]
   },
   {
+    "title": "Tất cả dịch vụ",
+    "module": "client",
+    "moduleName": "Tất cả dịch vụ",
+    "action": "all-service",
+    "actionName": "Tất cả dịch vụ",
+    "icon": "icon-drawer",
+    "show": true,
+    "items": []
+  },
+  {
     "title": "Quản lý Domain",
     "module": "client",
     "moduleName": "Dịch vụ",

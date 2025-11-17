@@ -18,16 +18,23 @@ function drillDownDomainFormatter(data, type, row, meta) {
   }
 }
 function actionDomainFormatter(data, type, row, meta) {
-  return (
-    `<div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+  let buttons = `<div class="btn-group" role="group" aria-label="Button group with nested dropdown">
     <a href="` +
     row.urlUpdateDNS +
     `" target="_blank" class="btn btn-sm btn-secondary">DNS</a>
     <a href="` +
     row.urlUpdateRecord +
-    `" target="_blank" class="btn btn-sm btn-primary">Bản ghi</a>  
-  </div>`
-  );
+    `" target="_blank" class="btn btn-sm btn-primary">Bản ghi</a>`;
+
+  if (row.inet_domain_id) { // Check if domain is registered on iNET
+    if (row.privacy_protection_status) {
+      buttons += `<button type="button" class="btn btn-sm btn-danger btn-toggle-privacy" data-id="${row.id}" data-action="unprivacy">Tắt bảo vệ</button>`;
+    } else {
+      buttons += `<button type="button" class="btn btn-sm btn-success btn-toggle-privacy" data-id="${row.id}" data-action="privacy">Bật bảo vệ</button>`;
+    }
+  }
+  buttons += `</div>`;
+  return buttons;
 }
 var report = (function (self, base) {
   base.action = "ajax_get-manage-report-index";
@@ -218,6 +225,45 @@ var report = (function (self, base) {
         ...data,
       };
       base.loadData();
+    });
+
+    base.table.on("click", ".btn-toggle-privacy", function (e) {
+      e.preventDefault();
+      var domain_id = $(this).data("id");
+      var action = $(this).data("action"); // 'privacy' or 'unprivacy'
+      var action_text = action === 'privacy' ? 'Bật' : 'Tắt';
+      var confirm_text = action === 'privacy' ? 'bật bảo vệ quyền riêng tư' : 'tắt bảo vệ quyền riêng tư';
+      var ajax_action = action === 'privacy' ? 'ajax_client_domain_privacy_protection' : 'ajax_client_domain_unprivacy_protection';
+
+      Swal.fire({
+        title: `Bạn có chắc chắn muốn ${confirm_text} cho tên miền này?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: action_text,
+        cancelButtonText: 'Hủy'
+      }).then((result) => {
+        if (result.value) {
+          callAjaxLoading(
+            {
+              action: ajax_action,
+              security: base.security, // Use base.security for reports
+              id: domain_id,
+            },
+            (res) => {
+              if (res.success) {
+                showSuccessMessage(() => {
+                  base.loadData(); // Reload table to reflect changes
+                }, res.data.msg);
+              } else {
+                showErrorMessage(res.data.msg);
+              }
+            },
+            (msg) => {
+              showErrorMessage(msg);
+            }
+          );
+        }
+      });
     });
   };
   base.order = [[0, "asc"]];

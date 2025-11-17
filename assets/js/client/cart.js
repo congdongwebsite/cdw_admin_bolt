@@ -10,7 +10,7 @@ var cart = (function (self) {
   self.security = $("#nonce").val();
   self.action = "ajax_get-list-cart";
 
-  self.update = (e) => {
+  self.getData = () => {
     let data = [];
     $("tbody .item ", self.context).map((index, value) => {
       data = [
@@ -21,7 +21,31 @@ var cart = (function (self) {
         },
       ];
     });
+    return data;
+  };
 
+  self.updateCart = (data) => {
+    callAjax(
+      {
+        data: data,
+        action: "ajax_client-cart-update",
+        security: self.security,
+      },
+      (res) => {
+        if (res.success) {
+          self.refresh();
+        } else {
+          showErrorMessage(res.data.msg, "Có lỗi xảy ra!");
+        }
+      },
+      (msg) => {
+        showErrorMessage(msg);
+      }
+    );
+  };
+
+  self.update = (e) => {
+    let data = self.getData();
     Swal.fire({
       title: "Cập nhật giỏ hàng",
       text: "Bạn có muốn cập nhật giỏ hàng?",
@@ -31,38 +55,12 @@ var cart = (function (self) {
       cancelButtonText: "Không",
     }).then((res) => {
       if (res.value) {
-        callAjaxLoading(
-          {
-            data: data,
-            action: "ajax_client-cart-update",
-            security: self.security,
-          },
-          (res) => {
-            if (res.success) {
-              self.refresh();
-            } else {
-              showErrorMessage(res.data.msg, "Có lỗi xảy ra!");
-            }
-          },
-          (msg) => {
-            showErrorMessage(msg);
-          }
-        );
+        self.updateCart(data);
       }
     });
   };
   self.checkout = (e) => {
-    let data = [];
-    $("tbody .item ", self.context).map((index, value) => {
-      data = [
-        ...data,
-        {
-          id: $(value).data().item,
-          quantity: $("input#quantity", $(value)).val(),
-        },
-      ];
-    });
-
+    let data = self.getData();
     Swal.fire({
       title: "Thanh toán",
       text: "Bắt đầu thanh toán?",
@@ -167,6 +165,11 @@ var cart = (function (self) {
 
     $(".list-items", self.context).on("click", ".remove", (e) => {
       self.delete(e);
+    });
+
+    $(".list-items", self.context).on("change", "input#quantity", (e) => {
+      let data = self.getData();
+      self.updateCart(data);
     });
   };
 

@@ -19,16 +19,22 @@ class Select2
         add_action('wp_ajax_ajax_ticket-type',  array($this, 'func_get_ticket_type'));
         add_action('wp_ajax_ajax_hosting',  array($this, 'func_get_hostings'));
         add_action('wp_ajax_ajax_hosting-feature',  array($this, 'func_get_hosting_feature'));
+        add_action('wp_ajax_ajax_hosting-package',  array($this, 'func_get_hosting_package'));
         add_action('wp_ajax_ajax_customer',  array($this, 'func_get_customers'));
         add_action('wp_ajax_ajax_plugin-types',  array($this, 'func_get_plugin_types'));
         add_action('wp_ajax_ajax_module-versions',  array($this, 'func_get_module_versions'));
         add_action('wp_ajax_ajax_plugins',  array($this, 'func_get_plugins'));
         add_action('wp_ajax_ajax_emails',  array($this, 'func_get_emails'));
         add_action('wp_ajax_ajax_version-type',  array($this, 'func_get_version_type'));
+        add_action('wp_ajax_ajax_dvhc-tp-inet',  array($this, 'func_get_dvhc_tp_inet'));
+        add_action('wp_ajax_nopriv_ajax_dvhc-tp-inet',  array($this, 'func_get_dvhc_tp_inet'));
+        add_action('wp_ajax_ajax_dvhc-ward-inet',  array($this, 'func_get_dvhc_ward_inet'));
+        add_action('wp_ajax_nopriv_ajax_dvhc-ward-inet',  array($this, 'func_get_dvhc_ward_inet'));
+        add_action('wp_ajax_ajax_inet_email_plans',  array($this, 'func_get_inet_email_plans'));
     }
     public function func_get_domain_status()
     {
-        $search = $_GET['search'];
+        $search = $_GET['search'] ?? '';
         $data = [
             [
                 "id" => "all",
@@ -64,7 +70,7 @@ class Select2
     public function func_get_domains()
     {
         $result = [];
-        $search = $_GET['search'];
+        $search = $_GET['search'] ?? '';
 
         $args = array(
             'post_type' => 'domain',
@@ -100,7 +106,7 @@ class Select2
     public function func_get_dvhc_tp()
     {
         global $CDWFunc;
-        $search = $_GET['search'];
+        $search = $_GET['search'] ?? '';
         $data = $CDWFunc->getListTP();
         $result = [];
         if (!empty($search)) {
@@ -118,7 +124,7 @@ class Select2
     public function func_get_dvhc_qh()
     {
         global $CDWFunc;
-        $search = $_GET['search'];
+        $search = $_GET['search'] ?? '';
         $parent = $_GET['parent'];
         $data = [];
         if (isset($parent) && !empty($parent)) {
@@ -140,7 +146,7 @@ class Select2
     public function func_get_dvhc_px()
     {
         global $CDWFunc;
-        $search = $_GET['search'];
+        $search = $_GET['search'] ?? '';
         $parent = $_GET['parent'];
         $data = [];
         if (isset($parent) && !empty($parent)) {
@@ -163,7 +169,7 @@ class Select2
     public function func_get_finance_types()
     {
         $result = [];
-        $search = $_GET['search'];
+        $search = $_GET['search'] ?? '';
 
         $args = array(
             'post_type' => 'finance-type',
@@ -198,7 +204,7 @@ class Select2
     }
     public function func_get_billing_status()
     {
-        $search = $_GET['search'];
+        $search = $_GET['search'] ?? '';
         $data = [
             [
                 "id" => "publish",
@@ -233,7 +239,7 @@ class Select2
     public function func_get_site_types()
     {
         $result = [];
-        $search = $_GET['search'];
+        $search = $_GET['search'] ?? '';
 
         $taxonomy = 'site-types';
 
@@ -267,7 +273,7 @@ class Select2
     public function func_get_sites()
     {
         $result = [];
-        $search = $_GET['search'];
+        $search = $_GET['search'] ?? '';
 
         $args = array(
             'post_type' => 'site-managers',
@@ -319,7 +325,7 @@ class Select2
     public function func_get_hostings()
     {
         $result = [];
-        $search = $_GET['search'];
+        $search = $_GET['search'] ?? '';
 
         $args = array(
             'post_type' => 'hosting',
@@ -354,7 +360,7 @@ class Select2
     }
     public function func_get_hosting_feature()
     {
-        $search = $_GET['search'];
+        $search = $_GET['search'] ?? '';
         $data = [
             [
                 "id" => "goi-pho-bien",
@@ -379,10 +385,44 @@ class Select2
         wp_die();
     }
 
+    public function func_get_hosting_package()
+    {
+        global $CDWFunc;
+
+        $search = $_GET['search'] ?? '';
+        $result = [];
+
+        $response = $CDWFunc->directAdmin->listResellerPackages();
+        write_syslog(__METHOD__ . " listResellerPackages " . print_r($response, true));
+
+        if (empty($response) || empty($response['list'])) {
+            wp_send_json_success($result);
+        }
+
+        $packages = array_map(function ($item) {
+            return [
+                'id'   => $item,
+                'text' => $item
+            ];
+        }, $response['list']);
+
+        if (! empty($search)) {
+            foreach ($packages as $item) {
+                if (str_contains(strtolower($item["text"]), strtolower($search))) {
+                    $result[] = $item;
+                }
+            }
+            wp_send_json_success($result);
+        }
+        wp_send_json_success($packages);
+
+        wp_die();
+    }
+
     public function func_get_customers()
     {
         $result = [];
-        $search = $_GET['search'];
+        $search = $_GET['search'] ?? '';
 
         $args = array(
             'post_type' => 'customer',
@@ -421,7 +461,7 @@ class Select2
     public function func_get_plugin_types()
     {
         $result = [];
-        $search = $_GET['search'];
+        $search = $_GET['search'] ?? '';
 
         $taxonomy = 'plugin-type';
 
@@ -452,41 +492,41 @@ class Select2
         wp_die();
     }
     public function func_get_module_versions()
-{
-    $result = [];
-    $search = $_GET['search'];
+    {
+        $result = [];
+        $search = $_GET['search'] ?? '';
 
-    $args = array(
-        'post_type'      => 'version',
-        'post_status'    => 'publish',
-        'posts_per_page' => -1,
-        'orderby'        => 'date',
-        'order'          => 'DESC',
-        'fields'         => 'ids',
-    );
+        $args = array(
+            'post_type'      => 'version',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+            'fields'         => 'ids',
+        );
 
-    if (!empty($search)) {
-        $args['s'] = $search;
+        if (!empty($search)) {
+            $args['s'] = $search;
+        }
+
+        $ids = get_posts($args);
+
+        foreach ($ids as $id) {
+            $item = [];
+            $item['id'] = $id;
+            $item['text'] = get_the_title($id);
+            $result[] = $item;
+        }
+
+        wp_send_json_success($result);
+
+        wp_die();
     }
-
-    $ids = get_posts($args);
-
-    foreach ($ids as $id) {
-        $item = [];
-        $item['id'] = $id;
-        $item['text'] = get_the_title($id);
-        $result[] = $item;
-    }
-
-    wp_send_json_success($result);
-
-    wp_die();
-}
 
     public function func_get_plugins()
     {
         $result = [];
-        $search = $_GET['search'];
+        $search = $_GET['search'] ?? '';
 
         $args = array(
             'post_type' => 'plugin',
@@ -522,7 +562,7 @@ class Select2
     public function func_get_emails()
     {
         $result = [];
-        $search = $_GET['search'];
+        $search = $_GET['search'] ?? '';
 
         $args = array(
             'post_type' => 'email',
@@ -557,7 +597,7 @@ class Select2
     }
     public function func_get_version_type()
     {
-        $search = $_GET['search'];
+        $search = $_GET['search'] ?? '';
         $data = [
             [
                 "id" => "theme",
@@ -579,6 +619,99 @@ class Select2
         }
         wp_send_json_success($data);
 
+        wp_die();
+    }
+
+    public function func_get_dvhc_tp_inet()
+    {
+        global $CDWFunc;
+        $search = $_GET['search'] ?? '';
+        $response = $CDWFunc->inet->getProvinceList();
+        $data = [];
+        if ($response['status'] == 200) {
+            $provinces = json_decode($response['data'], true);
+            if (is_array($provinces)) {
+                foreach ($provinces as $province) {
+                    $data[] = [
+                        'id' => $province['value'],
+                        'text' => $province['name'],
+                        'province_id' => $province['id']
+                    ];
+                }
+            }
+        }
+
+        $result = [];
+        if (!empty($search)) {
+            foreach ($data as $item) {
+                if (str_contains(strtolower($item["text"]), strtolower($search))) {
+                    $result[] = $item;
+                }
+            }
+            wp_send_json_success($result);
+        }
+        wp_send_json_success($data);
+
+        wp_die();
+    }
+
+    public function func_get_dvhc_ward_inet()
+    {
+        global $CDWFunc;
+        $search = $_GET['search'] ?? '';
+        $parent = $_GET['parent'];
+        $data = [];
+        if (isset($parent) && !empty($parent)) {
+            $response = $CDWFunc->inet->getWardListByParentId($parent);
+            if ($response['status'] == 200) {
+                $wards = json_decode($response['data'], true);
+                if (is_array($wards)) {
+                    foreach ($wards as $ward) {
+                        $data[] = [
+                            'id' => $ward['id'],
+                            'text' => $ward['name']
+                        ];
+                    }
+                }
+            }
+        }
+        
+        $result = [];
+        if (!empty($search)) {
+            foreach ($data as $item) {
+                if (str_contains(strtolower($item["text"]), strtolower($search))) {
+                    $result[] = $item;
+                }
+            }
+            wp_send_json_success($result);
+        }
+        wp_send_json_success($data);
+
+        wp_die();
+    }
+
+    public function func_get_inet_email_plans()
+    {
+        global $CDWFunc;
+        $search = $_GET['search'] ?? '';
+        $result = [];
+        $serviceType = 'email-062025';
+
+        $response = $CDWFunc->inet->get_service_plans('email', $serviceType,  $search);
+        
+        if ($response['success'] && !empty($response['data'])) {
+            foreach ($response['data'] as $plan) {
+                $item = [
+                    'id' => $plan['id'],
+                    'text' => $plan['name'],
+                    'title' => $plan['description'] ?? ''
+                ];
+
+                $result[] = $item;
+            }
+        }
+
+        wp_send_json_success($result);
         wp_die();
     }
 }

@@ -123,7 +123,8 @@ class AjaxManageVersion
                 'post_type' => 'version-detail',
                 'post_status' => 'publish',
                 'posts_per_page' => 1,
-                'orderby' => 'date',
+                'meta_key' => 'date',
+                'orderby' => 'meta_value',
                 'order' => 'DESC',
                 'fields' => 'ids',
                 'meta_query' => array(
@@ -194,7 +195,8 @@ class AjaxManageVersion
                 'post_type' => 'version-detail',
                 'post_status' => 'publish',
                 'posts_per_page' => 1,
-                'orderby' => 'date',
+                'meta_key' => 'date',
+                'orderby' => 'meta_value',
                 'order' => 'DESC',
                 'fields' => 'ids',
                 'meta_query' => array(

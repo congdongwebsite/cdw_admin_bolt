@@ -1,153 +1,101 @@
 <?php
-// wp_enqueue_style('slick-style');
-// wp_enqueue_style('slick-theme-style');
-// wp_enqueue_script('slick-script');
-get_header();
-?>
+defined('ABSPATH') || exit;
+global $CDWFunc, $menuAdmin, $userCurrent;
+$menuAdmin = new MenuAdmin();
+$userCurrent = wp_get_current_user();
+$fileModule = $CDWFunc->getModuleFileName(ACTION_ADMIN, MODULE_ADMIN, SUBACTION_ADMIN);
 
-<!-- <div class="slider-post">
-    <section class="container">
-        <?php
-        // Query Arguments
-        $post_slider_ids = get_field('post_slider', 'option');
-        $args = array(
-            'post_type' => array('post'),
-            'post_status' => array('publish'),
-            'posts_per_page' => 5,
-            'ignore_sticky_posts' => true,
-            'order' => 'DESC',
-            'orderby' => 'date',
-            'cat' => $post_slider_ids,
-        );
+$fileNameModule = $fileModule->fileName;
+$module_exists = $fileModule->found && file_exists($fileNameModule);
 
-        // The Query
-        $post_slider = new WP_Query($args);
+$fileBreadcrumb = $CDWFunc->getBreadcrumbFileName(ACTION_ADMIN, MODULE_ADMIN, SUBACTION_ADMIN);
+$fileNameBreadcrumb = $fileBreadcrumb->fileName;
+$breadcrumb_exists = $fileBreadcrumb->found && file_exists($fileNameBreadcrumb);
 
-        // The Loop
-        if ($post_slider->have_posts()) {
-            while ($post_slider->have_posts()) {
-                $post_slider->the_post();
-        ?>
-                <div>
-                    <div class="row header-blog align-middle">
-                        <div class="col-12 col-md-5 col-lg-5">
-                            <img class="slider-image" src="<?php echo get_the_post_thumbnail_url(get_the_ID(), 'full'); ?>" alt="<?php echo get_the_title(get_the_ID()); ?>" title="<?php echo get_the_title(get_the_ID()); ?>" />
-                        </div>
-                        <div class="col-12 col-md-7 col-lg-7">
-                            <div class="col-inner">
-                                <h3 class="title-post-slider"><?php echo get_the_title(get_the_ID()); ?></h3>
-                                <small class="date-post-slider">Ngày: <?php echo get_the_date(); ?> - Được đăng bởi <strong><?php echo get_the_author(); ?></strong></small>
-                                <p class="description-post-slider">
-                                    <?php echo wp_strip_all_tags(substr(get_the_content(get_the_ID()), 0, 500)); ?>...
-                                </p>
-                                <a href="<?php echo get_permalink(get_the_ID()); ?>" class="read-more-post-slider">Xem Thêm <i class="fa fa-angle-right" aria-hidden="true"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-        <?php
+$assetInit = $CDWFunc->getPathInit(ACTION_ADMIN, MODULE_ADMIN);
+if ($assetInit->found && file_exists($assetInit->fileName)) {
+    include($assetInit->fileName);
+}
+
+$rightBarModules = $CDWFunc->getModules(['inbox', 'chat']);
+
+switch (strtolower(MODULE_ADMIN)) {
+    case "lock":
+        $url = home_url();
+        header('Location: ' .  $url);
+        require_once('header-lock.php');
+        switch (strtolower(ACTION_ADMIN)) {
+            case 'index':
+                if (!is_user_logged_in()) {
+                    $url = $CDWFunc->getUrl('login', 'lock');
+                    if (isset($_GET['urlredirect']) && $_GET['urlredirect'] != '')
+                        $url .= '&urlredirect=' . urlencode($_GET['urlredirect']);
+                    header('Location: ' .  $url);
+                } else {
+                    $functionLock->lock();
+                }
+                break;
+            case 'login':
+            case 'register':
+            case 'forgot-password':
+                if (is_user_logged_in())
+                    header('Location: ' . $CDWFunc->getUrl('', ''));
+                break;
+            case 'maintenance':
+
+                break;
+            default;
+                if (is_user_logged_in())
+                    if ($functionLock->getLock())
+                        header('Location: ' . $CDWFunc->getUrl('index', 'lock'));
+                    else
+                        header('Location: ' . $CDWFunc->getUrl('', ''));
+        }
+        if ($module_exists) {
+            require_once($fileNameModule);
+        }
+        require_once('footer-lock.php');
+        break;
+    default:
+        if (!is_user_logged_in()) {
+            $url = home_url(); //$CDWFunc->getUrl('login', 'lock');
+            if (isset($_GET['urlredirect']) && $_GET['urlredirect'] != '')
+                $url .= '&urlredirect=' . urlencode($_GET['urlredirect']);
+            header('Location: ' .  $url);
+        } else {
+            // if ($functionLock->getLock())
+            //     header('Location: ' . $CDWFunc->getUrl('index', 'lock'));
+            if (isset($_GET['urlredirect']) && $_GET['urlredirect'] != '')
+                header('Location: ' . $_GET['urlredirect']);
+        }
+
+        if ($module_exists) {
+            if ($CDWFunc->checkPermission(ACTION_ADMIN, MODULE_ADMIN)) {
+                require_once('header.php');
+                require_once($fileNameModule);
+                require_once('footer.php');
+            } else {
+                require_once('header-lock.php');
+                require_once(ADMIN_THEME_URL . '/modules/lock/can-permission.php');
+                require_once('footer-lock.php');
             }
         } else {
-            // no posts found
-        }
-        /* Restore original Post Data */
-        wp_reset_postdata();
-        ?>
-
-    </section>
-</div>
-<script>
-    jQuery(document).ready(function($) {
-        $('.slider-post>.container').slick({
-            infinite: true,
-            slidesToShow: 1,
-            slidesToScroll: 1,
-            arrows: true,
-            dots: true,
-        });
-    });
-</script> -->
-<div class="post-feature my-3">
-    <section class="container">
-        <h2>Tin Tức Nổi Bật</h2>
-        <div class="list-post-feature row">
-            <?php
-            // Query Arguments
-            $post_feature_ids = get_field('post_feature', 'option');
-            $args = array(
-                'post_type' => array('post'),
-                'post_status' => array('publish'),
-                'posts_per_page' => 8,
-                'ignore_sticky_posts' => true,
-                'order' => 'DESC',
-                'orderby' => 'date',
-                'cat' => $post_feature_ids,
-            );
-
-            // The Query
-            $post_feature = new WP_Query($args);
-
-            // The Loop
-            if ($post_feature->have_posts()) {
-                while ($post_feature->have_posts()) {
-                    $post_feature->the_post();
-            ?>
-                    <div class="col-6 col-md-6 col-lg-3 my-3 bai-viet" data-aos="fade-up" data-aos-duration="3000">
-                        <a href="<?php echo get_permalink(get_the_ID()); ?>">
-                            <div class="image-cover">
-                                <img src="<?php echo get_the_post_thumbnail_url(get_the_ID(), 'thumbnail'); ?>" alt="<?php echo get_the_title(get_the_ID()); ?>" title="<?php echo get_the_title(get_the_ID()); ?>" />
-                            </div>
-                            <div class="box-bottom-single">
-                                <div class="date-singleblog">
-                                    <strong><?php echo get_the_time('d', get_the_ID()); ?></strong>
-                                    <span><?php echo get_the_time('m', get_the_ID()); ?>/<?php echo get_the_time('Y', get_the_ID()); ?></span>
-                                </div>
-                                <h4 class="title-post-feature"><?php echo get_the_title(get_the_ID()); ?></h4>
-                            </div>
-                        </a>
-                    </div>
-            <?php
-                }
+            if (count($_GET) > 0) {
+                require_once('header-lock.php');
+                require_once(ADMIN_THEME_URL . '/modules/lock/404.php');
+                require_once('footer-lock.php');
             } else {
-                // no posts found
+                require_once('header.php');
+
+                foreach ($userCurrent->roles as $role) {
+                    if (file_exists(ADMIN_THEME_URL . "/"  . "page-" . $role . ".php")) {
+                        require_once(ADMIN_THEME_URL . "/"  . "page-" . $role . ".php");
+                        break;
+                    } else
+                        require_once('page.php');
+                }
+
+                require_once('footer.php');
             }
-            /* Restore original Post Data */
-            wp_reset_postdata();
-            ?>
-
-        </div>
-    </section>
-</div>
-<section id="timeline" class="timeline-outer ">
-    <div class="container">
-        <ul class="title-blog">
-            <li><a href="/tin-tuc">Bài Viết Mới</a></li>
-            <?php
-            foreach (get_categories(['fields' => 'id=>name']) as $key => $cat) {
-            ?>
-                <li><a href="<?php echo get_term_link($key); ?>"><?php echo $cat; ?></a></li>
-            <?php
-            }
-            ?>
-        </ul>
-    </div>
-    <div class="container white-blog">
-        <ul class="timeline">
-            <?php if (have_posts()) : while (have_posts()) : the_post(); ?>
-
-                    <?php get_template_part('content', 'blog'); ?>
-                <?php endwhile; ?>
-
-                <?php congdongtheme_post_pagination(); ?>
-
-            <?php else : ?>
-
-                <?php get_template_part('content', 'none'); ?>
-
-            <?php endif; ?>
-
-        </ul>
-    </div>
-</section>
-
-<?php get_footer(); ?>
+        }
+}

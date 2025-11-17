@@ -1,13 +1,13 @@
 <?php
 global $CDWFunc, $CDWUser;
-$company = $CDWUser->company;
+$name = $CDWUser->name;
 $avatar = $CDWUser->avatar;
 ?>
 <div class="user-account">
-    <img src="<?php echo $avatar; ?>" class="rounded-circle user-photo" alt="<?php echo $company; ?>">
+    <img src="<?php echo $avatar; ?>" class="rounded-circle user-photo" alt="<?php echo $name; ?>">
     <div class="dropdown">
         <span>Xin chào,</span>
-        <a href="javascript:void(0);" class="dropdown-toggle user-name" data-toggle="dropdown"><strong><?php echo $company; ?></strong></a>
+        <a href="javascript:void(0);" class="dropdown-toggle user-name" data-toggle="dropdown"><strong><?php echo $name; ?></strong></a>
         <ul class="dropdown-menu dropdown-menu-right account">
             <?php
             $moduleProfile = $CDWFunc->getModule('index', 'profile');

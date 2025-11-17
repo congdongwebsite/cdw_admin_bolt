@@ -2,7 +2,7 @@ $(function () {
   "use strict";
   $(document).ready(function () {
     let form = $("form.form-setting-base-small");
-    initSelect2DVHCTPQHXP("dvhc-tp", form, "dvhc-qh", "dvhc-px");
+    initSelect2DVHCTPWard_iNET("dvhc-tp", form, "dvhc-px");
     form.parsley();
     $(".btn-setting-base", form).on("click", function (e) {
       e.preventDefault();
@@ -15,8 +15,14 @@ $(function () {
       Object.keys(formData).forEach((key) => {
         fdata.append(key, formData[key]);
       });
+      fdata.append('dvhc-tp-label', $('#dvhc-tp option:selected', form).text());
+      fdata.append('dvhc-px-label', $('#dvhc-px option:selected', form).text());
       if ($("#avatar-custom", form)[0].files.length > 0)
         fdata.append("shw_file", $("#avatar-custom", form)[0].files[0]);
+      if ($("#id-card-front-custom", form).length && $("#id-card-front-custom", form)[0].files.length > 0)
+        fdata.append("id_card_front", $("#id-card-front-custom", form)[0].files[0]);
+      if ($("#id-card-back-custom", form).length && $("#id-card-back-custom", form)[0].files.length > 0)
+        fdata.append("id_card_back", $("#id-card-back-custom", form)[0].files[0]);
 
       showLoading(
         $.ajax({
@@ -60,12 +66,12 @@ $(function () {
       );
     });
 
-    var readURL = function (input) {
+    var readURL = function (input, previewClass) {
       if (input.files && input.files[0]) {
         var reader = new FileReader();
 
         reader.onload = function (e) {
-          $(".avatar", form).attr("src", e.target.result);
+          $(previewClass, form).attr("src", e.target.result);
         };
 
         reader.readAsDataURL(input.files[0]);
@@ -73,11 +79,27 @@ $(function () {
     };
 
     $("#avatar-custom", form).on("change", function () {
-      readURL(this);
+      readURL(this, ".avatar");
     });
 
     $("#btn-upload-photo", form).on("click", function () {
       $("#avatar-custom", form).click();
+    });
+
+    $("#id-card-front-custom", form).on("change", function () {
+      readURL(this, ".id-card-front-preview");
+    });
+
+    $("#btn-upload-id-card-front", form).on("click", function () {
+      $("#id-card-front-custom", form).click();
+    });
+
+    $("#id-card-back-custom", form).on("change", function () {
+      readURL(this, ".id-card-back-preview");
+    });
+
+    $("#btn-upload-id-card-back", form).on("click", function () {
+      $("#id-card-back-custom", form).click();
     });
 
     let formaccount = $("form.form-setting-account-small");

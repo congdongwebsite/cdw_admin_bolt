@@ -14,10 +14,16 @@ if (isset($_GET['id']) && get_post_status($_GET['id'])) {
             </div>
             <div class="body">
                 <div class="row clearfix">
-                    <div class="col-lg-6 col-md-6 col-sm-6 col-12">
+                    <div class="col-lg-4 col-md-6 col-sm-6 col-12">
                         <div class="form-group">
                             <label for="title" class="control-label">Tên</label>
                             <input type="text" id="title" name="title" value="<?php echo get_the_title($id_detail); ?>" class="form-control" disabled>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-6 col-sm-6 col-12">
+                        <div class="form-group">
+                            <label for="inet_plan_id" class="control-label">iNET Plan ID</label>
+                            <select id="inet_plan_id" name="inet_plan_id" class="form-control select2" data-value="<?php echo get_post_meta($id_detail, 'inet_plan_id', true); ?>"></select>
                         </div>
                     </div>
 

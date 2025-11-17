@@ -77,15 +77,15 @@ $(function () {
                     versionDetailIdField.val(selectedVersionDetailId).trigger('change');
                 }
             } else {
-                console.error('Error loading version details:', response.data.msg);
+                showErrorMessage(response.data.msg || 'Không thể tải chi tiết phiên bản.', 'Lỗi');
             }
         }).fail(function () {
-            console.error('AJAX error loading version details.');
+            showErrorMessage('Lỗi AJAX khi tải chi tiết phiên bản.', 'Lỗi');
         });
     }
 
     function loadLicenses() {
-        tableBody.html('<tr><td colspan="8">Đang tải...</td></tr>');
+        tableBody.html('<tr><td colspan="10">Đang tải...</td></tr>');
 
         sendRequest('get_licenses').done(function (response) {
             if (response.success) {
@@ -115,10 +115,14 @@ $(function () {
                     tableBody.append(row);
                 });
             } else {
-                tableBody.html('<tr><td colspan="8">Không thể tải danh sách giấy phép.</td></tr>');
+                const msg = response.data.msg || 'Không thể tải danh sách giấy phép.';
+                showErrorMessage(msg, 'Lỗi');
+                tableBody.html(`<tr><td colspan="10">${msg}</td></tr>`);
             }
         }).fail(function () {
-            tableBody.html('<tr><td colspan="8">Đã xảy ra lỗi.</td></tr>');
+            const msg = 'Đã xảy ra lỗi khi tải giấy phép.';
+            showErrorMessage(msg, 'Lỗi');
+            tableBody.html(`<tr><td colspan="10">${msg}</td></tr>`);
         });
     }
 
@@ -141,10 +145,14 @@ $(function () {
                 const license = response.data.find(l => l.key === licenseKey);
                 if (license) {
                     $('#modal-license-key').text(license.key);
-                    $('#modal-plugin-id').text(license.plugin_id);
+                    $('#modal-plugin-code').text(license.plugin_code);
                     $('#view-details-modal').modal('show');
                 }
+            } else {
+                showErrorMessage(response.data.msg || 'Không thể lấy chi tiết giấy phép.', 'Lỗi');
             }
+        }).fail(function() {
+            showErrorMessage('Lỗi AJAX khi lấy chi tiết giấy phép.', 'Lỗi');
         });
     });
 
@@ -155,7 +163,12 @@ $(function () {
         sendRequest('delete', { license_id: licenseId }).done(function (response) {
             if (response.success) {
                 row.remove();
+                showSuccessMessage(null, 'Xóa giấy phép thành công.');
+            } else {
+                showErrorMessage(response.data.msg || 'Không thể xóa giấy phép.', 'Lỗi');
             }
+        }).fail(function() {
+            showErrorMessage('Lỗi AJAX khi xóa giấy phép.', 'Lỗi');
         });
     });
 
@@ -168,7 +181,11 @@ $(function () {
         sendRequest(action, { license_id: licenseId }).done(function (response) {
             if (response.success) {
                 loadLicenses();
+            } else {
+                showErrorMessage(response.data.msg || 'Không thể thay đổi trạng thái giấy phép.', 'Lỗi');
             }
+        }).fail(function() {
+            showErrorMessage('Lỗi AJAX khi thay đổi trạng thái giấy phép.', 'Lỗi');
         });
     });
 
@@ -178,7 +195,11 @@ $(function () {
         sendRequest('renew', { license_id: licenseId }).done(function (response) {
             if (response.success) {
                 loadLicenses();
+            } else {
+                showErrorMessage(response.data.msg || 'Không thể gia hạn giấy phép.', 'Lỗi');
             }
+        }).fail(function() {
+            showErrorMessage('Lỗi AJAX khi gia hạn giấy phép.', 'Lỗi');
         });
     });
 
@@ -204,7 +225,11 @@ $(function () {
                 if (license.plugin_id) {
                     loadVersionDetails(license.plugin_id, license.version_id);
                 }
+            } else {
+                showErrorMessage(response.data.msg || 'Không thể lấy chi tiết giấy phép để sửa.', 'Lỗi');
             }
+        }).fail(function() {
+            showErrorMessage('Lỗi AJAX khi lấy chi tiết giấy phép.', 'Lỗi');
         });
     });
 
@@ -228,7 +253,12 @@ $(function () {
             if (response.success) {
                 resetForm();
                 loadLicenses();
+                showSuccessMessage(null, 'Lưu giấy phép thành công.');
+            } else {
+                showErrorMessage(response.data.msg || 'Không thể lưu giấy phép.', 'Lỗi');
             }
+        }).fail(function() {
+            showErrorMessage('Lỗi AJAX khi lưu giấy phép.', 'Lỗi');
         }).always(function () {
             submitButton.prop('disabled', false).text('Lưu Giấy phép');
         });

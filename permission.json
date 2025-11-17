@@ -6,6 +6,14 @@
         "action": "index"
       },
       {
+        "module": "ticket",
+        "action": "detail"
+      },
+      {
+        "module": "manage-report",
+        "action": "all-service"
+      },
+      {
         "module": "manage",
         "action": "customer"
       },
@@ -322,6 +330,10 @@
       {
         "module": "inbox",
         "action": "index"
+      },
+      {
+        "module": "client",
+        "action": "all-service"
       },
       {
         "module": "client",

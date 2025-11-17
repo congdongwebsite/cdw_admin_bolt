@@ -190,4 +190,37 @@ class DateTimeHandler
 
         return strtotime($dateTimeString);
     }
+
+    public function diffInYears($date1, $date2, $format = null)
+    {
+        $format = $format ?? $this->formatDB;
+        $datetime1 = $this->create_datetime_from_string($date1, $format);
+        $datetime2 = $this->create_datetime_from_string($date2, $format);
+        $interval = $datetime1->diff($datetime2);
+        return $interval->y;
+    }
+
+    public function diffInDays($date1, $date2, $format = null)
+    {
+        $format = $format ?? $this->formatDB;
+        $datetime1 = $this->create_datetime_from_string($date1, $format);
+        $datetime2 = $this->create_datetime_from_string($date2, $format);
+        $interval = $datetime1->diff($datetime2);
+        return $interval->days;
+    }
+
+    public function diffInMonths($date1, $date2, $format = null)
+    {
+        $format = $format ?? $this->formatDB;
+        $datetime1 = $this->create_datetime_from_string($date1, $format);
+        $datetime2 = $this->create_datetime_from_string($date2, $format);
+        $interval = $datetime1->diff($datetime2);
+        return ($interval->y * 12) + $interval->m;
+    }
+
+    public function subtract2Days($dateTimeString, $formatFrom = null)
+    {
+        $formatFrom = $formatFrom ?? $this->formatFrom;
+        return $this->subtractDays($dateTimeString, 2, $formatFrom, $this->formatDB);
+    }
 }

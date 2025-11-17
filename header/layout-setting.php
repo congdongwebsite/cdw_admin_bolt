@@ -91,5 +91,5 @@
     </li>
 </ul>
 
-<a href="https://www.congdongweb.com/lien-he/" target="_blank" class="btn btn-block btn-primary">Liên hệ</a>
-<a href="https://www.congdongweb.com/kho-giao-dien" target="_blank" class="btn btn-block btn-secondary">Xem sản phẩm</a>
+<a href="<?php echo home_url(); ?>/lien-he/" target="_blank" class="btn btn-block btn-primary">Liên hệ</a>
+<a href="<?php echo home_url(); ?>/kho-giao-dien" target="_blank" class="btn btn-block btn-secondary">Xem sản phẩm</a>

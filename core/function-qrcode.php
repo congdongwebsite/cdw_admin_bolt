@@ -19,7 +19,7 @@ class FunctionQRCode
 
         $options = new QROptions;
 
-        $options->version             = 12;
+        $options->version             = QRCode::VERSION_AUTO;
         $options->outputBase64        = true;
         $options->scale               = 4;
         $options->imageTransparent    = true;

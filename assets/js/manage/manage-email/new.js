@@ -99,6 +99,49 @@ var newManageEmail = (function (self, base, details) {
     base.initialize();
     details.initialize();
 
+    initSelect2InetEmailPlans("inet_plan_id", base.form);
+
+    $("#inet_plan_id", base.form).on("change", function () {
+      var plan_id = $(this).val();
+      if (!plan_id) {
+        $("#title").val("");
+        $("#account").val("");
+        $("#hhd").val("");
+        Gia.set(0);
+        GiaHan.set(0);
+        return;
+      }
+
+      $.ajax({
+        url: objAdmin.ajax_url,
+        type: "POST",
+        data: {
+          action: "ajax_get_inet_email_plan_detail",
+          plan_id: plan_id,
+          security: $("#nonce").val(),
+        },
+        dataType: "json",
+        beforeSend: function () {
+          base.form.addClass("admin-loading");
+        },
+        success: function (res) {
+          if (res.success) {
+            const plan = res.data;
+            $("#title").val(plan.title);
+            $("#account").val(plan.account);
+            $("#hhd").val(plan.hhd);
+            Gia.set(plan.gia);
+            GiaHan.set(plan.gia_han);
+          } else {
+            showErrorMessage(res.data.msg, "Có lỗi xảy ra!");
+          }
+        },
+        complete: function () {
+          base.form.removeClass("admin-loading");
+        },
+      });
+    });
+
     [DetailGia, DetailGiaHan] = AutoNumeric.multiple(
       [details.modalName + " #gia", details.modalName + " #gia_han"],
       siteSettings.OptionAutoNumericAmountVND

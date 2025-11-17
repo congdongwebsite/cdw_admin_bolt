@@ -19,6 +19,11 @@ var checkout = (function (self) {
   self.time_out;
 
   self.checkout = (e) => {
+    if (!$("#acceptTerms").is(":checked")) {
+      showErrorMessage("Vui lòng đọc và chấp nhận các điều khoản và chính sách để tiếp tục.", "Chấp nhận điều khoản");
+      return;
+    }
+
     let data = [];
     $("tbody .item ", self.context).map((index, value) => {
       data = [
@@ -88,6 +93,11 @@ var checkout = (function (self) {
     );
   };
   self.checkoutPayment = (e) => {
+    if (!$("#acceptTerms").is(":checked")) {
+      showErrorMessage("Vui lòng đọc và chấp nhận các điều khoản và chính sách để tiếp tục.", "Chấp nhận điều khoản");
+      return;
+    }
+
     let payment = $(".payment-item:checked", self.context).val();
     Swal.fire({
       title: "Bắt đầu thanh toán đơn hàng",
@@ -160,6 +170,7 @@ var checkout = (function (self) {
       self.cancel();
     });
     $("input#quantity").bind("keyup mouseup", function () {
+      if ($(this).is("[readonly]")) return;
       let quantity = $(this).val();
       let price = $(".price", $(this).closest("tr.item")).data().price;
       let elAmount = $(".amount", $(this).closest("tr.item"));
@@ -235,10 +246,14 @@ var checkout = (function (self) {
       },
       (res) => {
         if (res.success) {
-          //$(".image-qr-code", self.context).attr("src", res.data.image_src);
-          self.templateCountDown = res.data.template.time;
-          self.time_out = res.data.time_out;
-          self.checkPayment();
+          if (res.data.pay_url) {
+            window.location.href = res.data.pay_url;
+          } else if (res.data.image_src) {
+            $(".image-qr-code", self.context).attr("src", res.data.image_src);
+            self.templateCountDown = res.data.template.time;
+            self.time_out = res.data.time_out;
+            self.checkPayment();
+          }
         } else {
           showErrorMessage(res.data.msg, "Có lỗi xảy ra!");
         }
@@ -279,42 +294,80 @@ var checkout = (function (self) {
   };
 
   self.checkPayment = () => {
-    callAjax(
-      {
-        id: $("#id", self.context).val(),
-        action: self.actionCheckPaymentMomo,
-        security: self.security,
-      },
-      (res) => {
-        if (res.success) {
-          console.log(
-            "🚀 ~ file: billing-checkout.js:227 ~ self.checkPayment= ~ res:",
-            res
-          );
-          showSuccessMessage(
-            function () {
-              window.location.href = res.data.checkout_url;
-            },
-            res.data.msg,
-            (title = "Thanh toán thành công")
-          );
-        } else {
-          showErrorMessage(
-            res.data.msg,
-            "Thanh toán thất bại!",
-            "info",
-            function () {
-              window.location.href = res.data.checkout_url;
-            }
-          );
-        }
+    self.startCountDown();
+
+    const pollingInterval = 1000;
+    const timeoutInSeconds = self.time_out;
+    let elapsedSeconds = 0;
+
+    const intervalId = setInterval(() => {
+      if (elapsedSeconds >= timeoutInSeconds) {
+        clearInterval(intervalId);
         self.stopCountDown();
-      },
-      (msg) => {
-        showErrorMessage(msg, "Có lỗi xảy ra!");
-      },
-      self.startCountDown()
-    );
+        showErrorMessage("Giao dịch đã hết hạn.", "Thanh toán thất bại!");
+        callAjax({
+            id: $("#id", self.context).val(),
+            action: "ajax_client-checkout-cancel",
+            security: self.security,
+            reason: "Giao dịch MoMo hết hạn."
+        }, (res) => {
+            if(res.success) window.location.href = res.data.checkout_url;
+        });
+        return;
+      }
+
+      $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: objAdmin.ajax_url,
+        data: {
+          id: $("#id", self.context).val(),
+          action: self.actionCheckPaymentMomo,
+          security: self.security,
+        },
+        success: function (res) {
+          if (res.success) {
+            clearInterval(intervalId);
+            self.stopCountDown();
+            showSuccessMessage(
+              () => { window.location.href = res.data.checkout_url; },
+              res.data.msg,
+              "Thanh toán thành công"
+            );
+          }
+        },
+        error: function (jqXHR) {
+          try {
+            const res = jqXHR.responseJSON;
+            if (res && res.data && [1000, 7000, 8000].includes(res.data.resultCode)) {
+              // Pending, do nothing
+            } else {
+              clearInterval(intervalId);
+              self.stopCountDown();
+              showErrorMessage(
+                (res && res.data && res.data.msg) ? res.data.msg : "Giao dịch thất bại.",
+                "Giao dịch không thành công"
+              );
+              callAjax({
+                  id: $("#id", self.context).val(),
+                  action: "ajax_client-checkout-cancel",
+                  security: self.security,
+                  reason: "Giao dịch thất bại hoặc bị hủy tại MoMo."
+              }, (res) => {
+                  if(res.success) window.location.href = res.data.checkout_url;
+              });
+            }
+          }
+          catch (e) {
+            clearInterval(intervalId);
+            self.stopCountDown();
+            showErrorMessage("Lỗi không xác định khi kiểm tra thanh toán.", "Có lỗi xảy ra!");
+          }
+        }
+      });
+
+      elapsedSeconds++;
+    }, pollingInterval);
   };
 
   self.initialize = async () => {
@@ -324,6 +377,45 @@ var checkout = (function (self) {
       $("#payment", self.context).val() == "momo"
     )
       await self.loadQR();
+    
+    self.handleMomoRedirect();
+  };
+
+  self.handleMomoRedirect = () => {
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get('orderId');
+    const resultCode = params.get('resultCode');
+
+    if (orderId && resultCode) {
+        const notice = $('<div class="momo-update-notice mt-3">Đang cập nhật trạng thái đơn hàng...</div>');
+        $('h3', self.context).after(notice);
+
+        $.ajax({
+            type: 'POST',
+            url: objAdmin.ajax_url,
+            data: {
+                action: 'ajax_momo_url_result',
+                nonce: $('#momo_nonce').val(),
+                momo_params: window.location.search,
+            },
+            success: function(response) {
+                if (response.success) {
+                    notice.text('Cập nhật thành công: ' + response.data.msg).addClass('alert alert-success');
+                } else {
+                    notice.text('Lỗi: ' + response.data.msg).addClass('alert alert-danger');
+                }
+                // Clean the URL and reload
+                const cleanUrl = window.location.pathname + '?module=client&action=billing&subaction=checkout&id=' + $('#id').val();
+                window.history.replaceState({}, document.title, cleanUrl);
+                setTimeout(() => window.location.reload(), 2000);
+            },
+            error: function() {
+                notice.text('Lỗi không xác định. Vui lòng liên hệ hỗ trợ.').addClass('alert alert-danger');
+                const cleanUrl = window.location.pathname + '?module=client&action=billing&subaction=checkout&id=' + $('#id').val();
+                window.history.replaceState({}, document.title, cleanUrl);
+            }
+        });
+    }
   };
 
   return self;

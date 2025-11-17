@@ -11,7 +11,7 @@ var baseDetailPostType = function (self) {
     const params = new URLSearchParams(settings.data);
     const security = params.get("security");
     if (!Swal.isVisible() && security != null && security == self.security) {
-      showLoading();
+      // showLoading();
     }
   });
 
@@ -25,11 +25,11 @@ var baseDetailPostType = function (self) {
   });
   $(document).ajaxStop(function () {
     if (Swal.isVisible()) {
-      hideLoading();
+      // hideLoading();
     }
   });
   self.event = () => {
-    console.log('self.form',self.form);
+    // console.log('self.form',self.form);
     $(".btn-save", self.form).on("click", function (e) {
       e.preventDefault();
       self.BaseSave(e);

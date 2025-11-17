@@ -32,6 +32,7 @@ if (isset($_GET['id'])) $step = 2;
 ?>
 <div class="client-checkout">
     <?php wp_nonce_field('ajax-client-checkout-nonce', 'nonce'); ?>
+    <?php wp_nonce_field('ajax_momo_url_nonce', 'momo_nonce'); ?>
     <input type="hidden" name="id" id="id" value="<?php echo $id; ?>">
 
     <div class="row clearfix row-deck">
@@ -127,6 +128,21 @@ if (isset($_GET['id'])) $step = 2;
                             </div>
                             <div class="row clearfix">
                                 <div class="hidden-print col-md-12 text-right">
+                                    <?php
+                                    if (($checkoutStatus == 'pending' || $checkoutStatus == 'publish') && $checkoutStatus != 'success' && $checkoutStatus != 'cancel' && !empty($checkoutStatus)) {
+                                    ?>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" value="" id="acceptTerms" required>
+                                            <label class="form-check-label" for="acceptTerms">
+                                                Tôi xác nhận đã đọc và chấp nhận với các <a style=" color: blue; " href="https://www.congdongweb.com/dieu-khoan-su-dung/" target="_blank">Điều khoản sử dụng dịch vụ</a>, <a style=" color: blue; " href="https://www.congdongweb.com/chinh-sach-thu-thap-va-xu-ly-du-lieu-ca-nhan/" target="_blank">Chính sách quyền riêng tư</a>
+                                            </label>
+                                            <div class="invalid-feedback">
+                                                Bạn phải chấp nhận các điều khoản và chính sách để tiếp tục.
+                                            </div>
+                                        </div>
+                                    <?php
+                                    }
+                                    ?>
                                     <button class="btn btn-outline-secondary btn-print"><i class="icon-printer"></i></button>
                                     <?php
                                     if ($checkoutStatus != 'cancel' && $checkoutStatus != 'success' && !empty($checkoutStatus)) {

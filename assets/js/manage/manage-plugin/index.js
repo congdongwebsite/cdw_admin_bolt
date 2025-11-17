@@ -29,6 +29,7 @@ var managePlugin = (function (self, base) {
   base.column = [
     { data: "image", title: "Ảnh" },
     { data: "title", title: "Tiêu đề" },
+    { data: "code", title: "Code" },
     { data: "name", title: "Tên plugin" },
     { data: "module_version_name", title: "Module Version" },
     { data: "url", title: "URL" },
@@ -45,7 +46,7 @@ var managePlugin = (function (self, base) {
       render: imageFormatter,
     },
     {
-      targets: 5,
+      targets: 6,
       render: numberFormatterAmountVND,
     },
   ];

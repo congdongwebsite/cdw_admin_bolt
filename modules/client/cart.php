@@ -3,6 +3,25 @@ global $userCurrent, $CDWCart, $CDWFunc;
 ?>
 <div class="client-cart">
     <?php wp_nonce_field('ajax-client-cart-nonce', 'nonce'); ?>
+    <?php
+    if ($CDWFunc->isAdministrator()) {
+        $customer_id = get_user_meta($userCurrent->ID, 'customer-default-id', true);
+        if ($customer_id) {
+            $name = get_post_meta($customer_id, "name", true);
+            if ($name) {
+                ?>
+                <div class="row clearfix">
+                    <div class="col-12">
+                        <div class="alert alert-info" role="alert">
+                            Đang xem giỏ hàng của khách hàng: <strong><?php echo esc_html($name); ?></strong>
+                        </div>
+                    </div>
+                </div>
+                <?php
+            }
+        }
+    }
+    ?>
     <div class="row clearfix row-deck">
         <div class="col-lg-8">
             <div class="card">
@@ -13,7 +32,7 @@ global $userCurrent, $CDWCart, $CDWFunc;
                                 <table class="table table-hover">
                                     <thead class="thead-dark">
                                         <tr>
-                                            <th></th>
+                                            <th><button class="btn btn-light btn-sm btn-delete-all" title="Xóa giỏ hàng"><i class="fa fa-trash"></i></button></th>
                                             <th>#</th>
                                             <th>Dịch vụ</th>
                                             <th class="hidden-sm-down">Mô tả</th>
@@ -28,7 +47,6 @@ global $userCurrent, $CDWCart, $CDWFunc;
                             </div>
                             <div class="text-right actions">
                                 <button class="btn btn-secondary btn-update mr-3">Cập nhật giỏ hàng</button>
-                                <button class="btn btn-danger btn-delete-all">Xóa giỏ hàng</button>
                             </div>
                         </div>
                     </div>

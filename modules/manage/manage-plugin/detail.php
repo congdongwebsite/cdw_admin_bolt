@@ -22,6 +22,12 @@ if (isset($_GET['id']) && get_post_status($_GET['id'])) {
                             </div>
                             <div class="col-lg-6 col-md-6 col-sm-6 col-12">
                                 <div class="form-group">
+                                    <label for="code" class="control-label">Code</label>
+                                    <input type="text" id="code" name="code" class="form-control" value="<?php echo get_post_meta($id_detail, 'code', true); ?>" disabled>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-12">
+                                <div class="form-group">
                                     <label for="name" class="control-label">Tên plugin</label>
                                     <input type="text" id="name" name="name" class="form-control" value="<?php echo get_post_meta($id_detail, 'name', true); ?>" required>
                                 </div>

@@ -51,6 +51,12 @@
                             <div class="row clearfix">
                                 <div class="col-lg-6 col-md-6 col-sm-12 col-12">
                                     <div class="form-group">
+                                        <label for="domain" class="control-label">Domain</label>
+                                        <input type="text" id="domain" name="domain" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+                                    <div class="form-group">
                                         <label for="url_admin" class="control-label">Url Admin</label>
                                         <input type="text" id="url_admin" name="url_admin" class="form-control" required>
                                     </div>

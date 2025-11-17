@@ -14,8 +14,39 @@ if (isset($_POST['destroy'])) {
 }
 
 $sessions = wp_get_all_sessions($CDWUser->id);
+
+$customer_id = get_user_meta($CDWUser->id, 'customer-id', true);
+$kyc_status = '1'; // Mặc định là chưa xác thực
+
+$kyc_status_meta = get_post_meta($customer_id, 'status-kyc', true);
+if (!empty($kyc_status_meta)) {
+    $kyc_status = $kyc_status_meta;
+}
+
+switch ($kyc_status) {
+    case '2':
+        $kyc_status_text = 'Đang Xác Thực Tài Khoản';
+        $kyc_status_class = 'warning';
+        break;
+    case '3':
+        $kyc_status_text = 'Đã Xác Thực Tài Khoản';
+        $kyc_status_class = 'success';
+        break;
+    case '1':
+    default:
+        $kyc_status_text = 'Chưa Xác Thực Tài Khoản';
+        $kyc_status_class = 'danger';
+        break;
+}
 ?>
 <div class="row clearfix">
+    <div class="col-12">
+        <div class="card">
+            <div class="body">
+                <h6 class="mb-0">Trạng thái tài khoản: <span class="text-<?php echo $kyc_status_class; ?> font-weight-bold"><?php echo $kyc_status_text; ?></span></h6>
+            </div>
+        </div>
+    </div>
 
     <div class="col-lg-3 col-md-12">
         <div class="card profile-header">

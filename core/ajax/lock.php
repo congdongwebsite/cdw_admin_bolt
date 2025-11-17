@@ -5,6 +5,7 @@ class AjaxAdmin
     public function __construct()
     {
         require_once(ADMIN_THEME_URL . '/core/encryption.php');
+        add_action('wp_ajax_ajax_login',  array($this, 'func_login'));
         add_action('wp_ajax_nopriv_ajax_login',  array($this, 'func_login'));
         add_action('wp_ajax_nopriv_ajax_register',  array($this, 'func_register'));
         add_action('wp_ajax_ajax_unlock',  array($this, 'func_unlock'));
@@ -64,7 +65,7 @@ class AjaxAdmin
     {
         global $CDWRecaptcha, $CDWFunc;
         // First check the nonce, if it fails the function will break
-        check_ajax_referer('ajax-login-nonce', 'security');
+        // check_ajax_referer('ajax-login-nonce', 'security');
         $CDWRecaptcha->checkPost('login');
         $urlredirect = isset($_POST['urlredirect']) ? $_POST['urlredirect'] : "";
         $security = $_POST['security'];

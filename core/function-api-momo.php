@@ -13,7 +13,7 @@ class APIMomo
     {
         $url = $this->baseURL . '/v2/gateway/api/create';
 
-        $requestId =  UUID::v4();
+        $requestId = uniqid();
         $requestType = 'payWithMethod';
         $autoCapture = True;
         $lang = 'vi';
@@ -43,37 +43,17 @@ class APIMomo
         return  $this->checkResultCode($response);
     }
 
-    public function delivery($amount, $extraData, $ipnUrl, $orderId, $orderInfo, $redirectUrl)
+    public function delivery($amount, $extraData, $ipnUrl, $orderId, $orderInfo, $redirectUrl, $items, $userInfo)
     {
         $url = $this->baseURL . '/v2/gateway/api/create';
 
-        $requestId =  UUID::v4();
+        $requestId = uniqid();
         $requestType = 'onDelivery';
         $autoCapture = True;
         $orderGroupId = '';
         $rawHash = "accessKey=" . APIMOMOACCESSKEY . "&amount=" . $amount . "&extraData=" . $extraData . "&ipnUrl=" . $ipnUrl . "&orderId=" . $orderId . "&orderInfo=" . $orderInfo . "&partnerCode=" . APIMOMOPARTNERCODE . "&redirectUrl=" . $redirectUrl . "&requestId=" . $requestId . "&requestType=" . $requestType;
         $signature = hash_hmac("sha256", $rawHash, APIMOMOSECRETKEY);
 
-        $item = [
-            [
-                "id" => "204727",
-                "name" => "YOMOST Bac Ha&Viet Quat 170ml",
-                "description" => "YOMOST Sua Chua Uong Bac Ha&Viet Quat 170ml/1 Hop",
-                "category" => "beverage",
-                "imageUrl" => "https://momo.vn/uploads/product1.jpg",
-                "manufacturer" => "Vinamilk",
-                "price" => 11000,
-                "quantity" => 5,
-                "unit" => "hộp",
-                "totalPrice" => 55000,
-                "taxAmount" => "200"
-            ]
-        ];
-        $userInfo = array(
-            "name" => "Nguyen Van A",
-            "phoneNumber" => "0999888999",
-            "email" => "email_add@domain.com",
-        );
         $data = array(
             'partnerCode' => APIMOMOPARTNERCODE,
             'partnerName' => APIMOMOPARTNERNAME,
@@ -81,7 +61,7 @@ class APIMomo
             'requestId' => $requestId,
             'amount' => $amount,
             'orderId' => $orderId,
-            'item' =>  $item,
+            'items' =>  $items,
             'userInfo' =>  $userInfo,
             'orderInfo' => $orderInfo,
             'requestType' => $requestType,
@@ -93,7 +73,7 @@ class APIMomo
             'orderGroupId' => $orderGroupId,
             'signature' => $signature
         );
-
+        error_log('[delivery] data: ' . json_encode($data));
         $response = $this->sendRequest($url, $data);
         return  $this->checkResultCode($response);
     }
@@ -148,7 +128,7 @@ class APIMomo
     {
         $url = $this->baseURL . '/v2/gateway/api/query';
 
-        $requestId =  UUID::v4();
+        $requestId = uniqid();
         $requestType = 'onDelivery';
         $rawHash = "accessKey=" . APIMOMOACCESSKEY . "&orderId=" . $orderId . "&partnerCode=" . APIMOMOPARTNERCODE . "&requestId=" . $requestId;
         $signature = hash_hmac("sha256", $rawHash, APIMOMOSECRETKEY);
@@ -178,62 +158,156 @@ class APIMomo
         if (isset($data['resultCode']))
             switch ((int)$data['resultCode']) {
                 case 0: //Thành công.
-                case 9000: //Giao dịch đã được xác nhận thành công.
-                case 8000: //Giao dịch đang ở trạng thái cần được người dùng xác nhận thanh toán lại.
-                case 7000: //Giao dịch đang được xử lý.
-                case 7002: //Giao dịch đang được xử lý bởi nhà cung cấp loại hình thanh toán.
-                case 1000: //Giao dịch đã được khởi tạo, chờ người dùng xác nhận thanh toán.
                     $status = true;
-                    $message = $data['message'];
+                    $message = "Giao dịch thành công.";
+                    break;
+                case 10: //Hệ thống đang được bảo trì.
+                    $status = false;
+                    $message = "Hệ thống đang được bảo trì. Vui lòng thử lại sau khi bảo trì kết thúc.";
                     break;
                 case 11: //Truy cập bị từ chối.
-                case 12: //Phiên bản API không được hỗ trợ cho yêu cầu này.
-                case 13: //Xác thực doanh nghiệp thất bại.
-                case 20: //Yêu cầu sai định dạng.
-                case 22: //Số tiền giao dịch không hợp lệ.
-                case 40: //RequestId bị trùng.
-                case 41: //OrderId bị trùng.
-                case 42: //OrderId không hợp lệ hoặc không được tìm thấy.
-                case 43: //Yêu cầu bị từ chối vì xung đột trong quá trình xử lý giao dịch.
-                case 44: //Giao dịch bị từ chối vì mã thanh toán không hợp lệ.
-                case 1001: //Giao dịch thanh toán thất bại do tài khoản người dùng không đủ tiền.
-                case 1002: //Giao dịch bị từ chối do nhà phát hành tài khoản thanh toán.
-                case 1003: //Giao dịch bị đã bị hủy.
-                case 1004: //Giao dịch thất bại do số tiền thanh toán vượt quá hạn mức thanh toán của người dùng.
-                case 1005: //Giao dịch thất bại do url hoặc QR code đã hết hạn.
-                case 1006: //Giao dịch thất bại do người dùng đã từ chối xác nhận thanh toán.
-                case 1007: //Giao dịch bị từ chối vì tài khoản không tồn tại hoặc đang ở trạng thái ngưng hoạt động.
-                case 1026: //Giao dịch bị hạn chế theo thể lệ chương trình khuyến mãi.
-                case 1030: //Đơn hàng thanh toán thất bại do thông tin không hợp lệ.
-                case 1080: //Giao dịch hoàn tiền bị từ chối. Giao dịch thanh toán ban đầu không được tìm thấy hoặc xử lý tại thời điểm này.
-                case 1081: //Giao dịch hoàn tiền bị từ chối. Giao dịch thanh toán ban đầu có thể đã được hoàn.
-                case 2001: //Giao dịch thất bại do sai thông tin liên kết.
-                case 2007: //Giao dịch thất bại do liên kết hiện đang bị tạm khóa.
-                case 3001: //Liên kết thất bại do người dùng từ chối xác nhận.
-                case 3002: //Liên kết bị từ chối do không thỏa quy tắc liên kết.
-                case 3003: //Hủy liên kết bị từ chối do đã vượt quá số lần hủy.
-                case 3004: //Liên kết này không thể hủy do có giao dịch đang chờ xử lý.
-                case 4001: //Giao dịch bị hạn chế do người dùng chưa hoàn tất xác thực tài khoản.
-                case 4010: //Quá trình xác minh OTP thất bại.
-                case 4011: //OTP chưa được gửi hoặc hết hạn.
-                case 4100: //Giao dịch thất bại do người dùng không đăng nhập thành công.
-                case 4015: //Quá trình xác minh 3DS thất bại.
-                case 10: //Hệ thống đang được bảo trì.
-                case 90: //Lỗi kết nối.
-                case 99: //Lỗi không xác định.
-                case 21: //Yêu cầu bị từ chối vì số tiền giao dịch không hợp lệ.
-                case 45: //Trùng ItemId
-                case 2019: //Yêu cầu bị từ chối vì orderGroupId không hợp lệ.
-                case 1008: //Giao dịch thất bại vì số tiền vượt quá hạn mức nhận tiền cho phép của người dùng.
-                case 1100: //Tài khoản Đối tác không đủ số dư thực hiện giao dịch. Vui lòng liên hệ MoMo để được hỗ trợ.
-                case 1507: //Không tìm thấy Thẻ Ngân hàng hoặc Tài khoản ngân hàng hoặc BankCode không tồn tại. Vui lòng kiểm tra thông tin Ngân hàng và thực hiện lại.
-                case 4003: //Chi hộ thất bại vì thông tin tài khoản người nhận không hợp lệ.
                     $status = false;
-                    $message = $data['message'];
+                    $message = "Truy cập bị từ chối. Lỗi cài đặt Merchant. Vui lòng kiểm tra cài đặt trong cổng M4B hoặc liên hệ MoMo để cấu hình.";
                     break;
-                case 8003: //Yêu cầu khởi tạo chi hộ theo lô đã được thực hiện thành công.
+                case 12: //Phiên bản API không được hỗ trợ cho yêu cầu này.
+                    $status = false;
+                    $message = "Phiên bản API không được hỗ trợ cho yêu cầu này. Vui lòng nâng cấp lên phiên bản cổng thanh toán mới nhất vì phiên bản hiện tại không còn được hỗ trợ.";
+                    break;
+                case 13: //Xác thực doanh nghiệp thất bại.
+                    $status = false;
+                    $message = "Xác thực Merchant thất bại. Vui lòng kiểm tra thông tin đăng nhập của bạn và thông tin được cung cấp trong cổng M4B.";
+                    break;
+                case 20: //Yêu cầu sai định dạng.
+                    $status = false;
+                    $message = "Yêu cầu sai định dạng. Vui lòng kiểm tra định dạng yêu cầu hoặc bất kỳ tham số nào bị thiếu.";
+                    break;
+                case 21: //Yêu cầu bị từ chối vì số tiền giao dịch không hợp lệ.
+                    $status = false;
+                    $message = "Yêu cầu bị từ chối do số tiền giao dịch không hợp lệ. Vui lòng kiểm tra xem số tiền có không liên quan không và thử lại yêu cầu.";
+                    break;
+                case 22: //Số tiền giao dịch nằm ngoài phạm vi.
+                    $status = false;
+                    $message = "Số tiền giao dịch nằm ngoài phạm vi. Vui lòng kiểm tra xem số tiền có nằm trong phạm vi cho phép của từng phương thức thanh toán không. Đối với loại yêu cầu thu tiền, hãy kiểm tra xem số tiền thu có khớp với số tiền được ủy quyền không.";
+                    break;
+                case 40: //RequestId bị trùng.
+                    $status = false;
+                    $message = "RequestId bị trùng. Vui lòng thử lại với RequestId khác.";
+                    break;
+                case 41: //OrderId bị trùng.
+                    $status = false;
+                    $message = "OrderId bị trùng. Vui lòng kiểm tra trạng thái giao dịch của OrderId hoặc thử lại với OrderId khác.";
+                    break;
+                case 42: //OrderId không hợp lệ hoặc không được tìm thấy.
+                    $status = false;
+                    $message = "OrderId không hợp lệ hoặc không được tìm thấy. Vui lòng thử lại với OrderId khác.";
+                    break;
+                case 43: //Yêu cầu bị từ chối vì xung đột trong quá trình xử lý giao dịch.
+                    $status = false;
+                    $message = "Yêu cầu bị từ chối do một giao dịch tương tự đang được xử lý. Trước khi thử lại, vui lòng kiểm tra xem có giao dịch tương tự nào khác đang được xử lý hạn chế yêu cầu này không.";
+                    break;
+                case 45: //Trùng ItemId
+                    $status = false;
+                    $message = "ItemId bị trùng. Vui lòng kiểm tra và thử lại yêu cầu với ItemId duy nhất.";
+                    break;
+                case 47: //Yêu cầu bị từ chối do thông tin không áp dụng trong tập dữ liệu có giá trị đã cho.
+                    $status = false;
+                    $message = "Yêu cầu bị từ chối do thông tin không áp dụng trong tập dữ liệu có giá trị đã cho. Vui lòng xem xét và thử lại với yêu cầu khác.";
+                    break;
+                case 98: //Mã QR này chưa được tạo thành công. Vui lòng thử lại sau.
+                    $status = false;
+                    $message = "Mã QR này chưa được tạo thành công. Vui lòng thử lại sau.";
+                    break;
+                case 99: //Lỗi không xác định.
+                    $status = false;
+                    $message = "Lỗi không xác định. Vui lòng liên hệ MoMo để biết thêm chi tiết.";
+                    break;
+                case 1000: //Giao dịch đã được khởi tạo, chờ người dùng xác nhận thanh toán.
                     $status = true;
-                    $message = $data['message'];
+                    $message = "Giao dịch đã được khởi tạo, chờ người dùng xác nhận.";
+                    break;
+                case 1001: //Giao dịch thanh toán thất bại do tài khoản người dùng không đủ tiền.
+                    $status = false;
+                    $message = "Giao dịch thất bại do không đủ tiền. Lỗi Merchant.";
+                    break;
+                case 1002: //Giao dịch bị từ chối do nhà phát hành tài khoản thanh toán.
+                    $status = false;
+                    $message = "Giao dịch bị từ chối bởi nhà phát hành của các phương thức thanh toán. Vui lòng chọn phương thức thanh toán khác.";
+                    break;
+                case 1003: //Giao dịch bị đã bị hủy.
+                    $status = false;
+                    $message = "Giao dịch bị hủy sau khi ủy quyền thành công. Giao dịch đã bị hủy bởi Merchant hoặc hệ thống MoMo do xử lý hết thời gian. Vui lòng đánh dấu giao dịch là thất bại.";
+                    break;
+                case 1004: //Giao dịch thất bại do số tiền thanh toán vượt quá hạn mức thanh toán của người dùng.
+                    $status = false;
+                    $message = "Giao dịch thất bại vì số tiền vượt quá giới hạn thanh toán hàng ngày/hàng tháng. Vui lòng đánh dấu giao dịch là thất bại và thử lại vào ngày khác.";
+                    break;
+                case 1005: //Giao dịch thất bại do url hoặc QR code đã hết hạn.
+                    $status = false;
+                    $message = "Giao dịch thất bại vì URL hoặc mã QR đã hết hạn. Vui lòng gửi yêu cầu thanh toán khác.";
+                    break;
+                case 1006: //Giao dịch thất bại do người dùng đã từ chối xác nhận thanh toán.
+                    $status = false;
+                    $message = "Giao dịch thất bại vì người dùng đã từ chối xác nhận thanh toán. Vui lòng gửi yêu cầu thanh toán khác.";
+                    break;
+                case 1007: //Giao dịch bị từ chối vì tài khoản không tồn tại hoặc đang ở trạng thái ngưng hoạt động.
+                    $status = false;
+                    $message = "Giao dịch bị từ chối do tài khoản người dùng không hoạt động hoặc không tồn tại. Vui lòng đảm bảo trạng thái tài khoản phải hoạt động/đã xác minh trước khi thử lại hoặc liên hệ MoMo để được hỗ trợ.";
+                    break;
+                case 1017: //Giao dịch bị hủy bởi Merchant.
+                    $status = false;
+                    $message = "Giao dịch bị hủy bởi Merchant. Lỗi Merchant.";
+                    break;
+                case 1026: //Giao dịch bị hạn chế theo thể lệ chương trình khuyến mãi.
+                    $status = false;
+                    $message = "Giao dịch bị hạn chế do quy tắc khuyến mãi. Vui lòng liên hệ MoMo để biết chi tiết hạn chế.";
+                    break;
+                case 1080: //Giao dịch hoàn tiền bị từ chối. Giao dịch thanh toán ban đầu không được tìm thấy hoặc xử lý tại thời điểm này.
+                    $status = false;
+                    $message = "Thử hoàn tiền thất bại trong quá trình xử lý. Vui lòng thử lại trong thời gian ngắn, tốt nhất là sau một giờ.";
+                    break;
+                case 1081: //Giao dịch hoàn tiền bị từ chối. Giao dịch thanh toán ban đầu có thể đã được hoàn.
+                    $status = false;
+                    $message = "Hoàn tiền bị từ chối. Giao dịch gốc có thể đã được hoàn tiền. Vui lòng kiểm tra xem giao dịch gốc đã được hoàn tiền chưa hoặc số tiền yêu cầu hoàn tiền của bạn vượt quá số tiền có thể hoàn lại.";
+                    break;
+                case 1088: //Giao dịch hoàn tiền bị từ chối. Giao dịch thanh toán gốc không đủ điều kiện để được hoàn tiền.
+                    $status = false;
+                    $message = "Hoàn tiền bị từ chối. Giao dịch thanh toán gốc không đủ điều kiện để được hoàn tiền. Vui lòng liên hệ MoMo để biết chi tiết hạn chế.";
+                    break;
+                case 2019: //Yêu cầu bị từ chối vì orderGroupId không hợp lệ.
+                    $status = false;
+                    $message = "Yêu cầu bị từ chối do orderGroupId không hợp lệ. Vui lòng liên hệ MoMo để biết chi tiết hạn chế.";
+                    break;
+                case 4001: //Giao dịch bị hạn chế do người dùng chưa hoàn tất xác thực tài khoản.
+                    $status = false;
+                    $message = "Giao dịch bị từ chối vì tài khoản người dùng đang bị hạn chế. Vui lòng liên hệ MoMo để biết chi tiết hạn chế của tài khoản người dùng này.";
+                    break;
+                case 4002: //Giao dịch bị từ chối vì tài khoản người dùng chưa được xác minh bởi C06.
+                    $status = false;
+                    $message = "Giao dịch bị từ chối vì tài khoản người dùng chưa được xác minh bởi C06. Người dùng phải cập nhật thông tin sinh trắc học qua NFC để được ủy quyền cho giao dịch.";
+                    break;
+                case 4100: //Giao dịch thất bại do người dùng không đăng nhập thành công.
+                    $status = false;
+                    $message = "Giao dịch thất bại vì người dùng không đăng nhập thành công. Lỗi người dùng.";
+                    break;
+                case 7000: //Giao dịch đang được xử lý.
+                    $status = true;
+                    $message = "Giao dịch đang được xử lý. Vui lòng đợi giao dịch được xử lý hoàn tất.";
+                    break;
+                case 7002: //Giao dịch đang được xử lý bởi nhà cung cấp loại hình thanh toán.
+                    $status = true;
+                    $message = "Giao dịch đang được xử lý bởi nhà cung cấp công cụ thanh toán đã chọn. Vui lòng đợi giao dịch được xử lý. Trạng thái giao dịch sẽ được thông báo sau khi xử lý xong.";
+                    break;
+                case 8000: //Giao dịch đang ở trạng thái cần được người dùng xác nhận thanh toán lại.
+                    $status = true;
+                    $message = "Giao dịch đang ở trạng thái cần được người dùng xác nhận thanh toán lại.";
+                    break;
+                case 9000: //Giao dịch đã được xác nhận thành công.
+                    $status = true;
+                    $message = "Giao dịch được ủy quyền thành công. Đối với thanh toán 1 bước, vui lòng đánh dấu giao dịch này là thành công. Đối với thanh toán 2 bước, vui lòng tiến hành yêu cầu thu tiền hoặc hủy. Đối với liên kết, vui lòng tiến hành yêu cầu mã thông báo định kỳ.";
+                    break;
+                default:
+                    $status = false;
+                    $message = $data['message'] ?? 'Lỗi không xác định.';
                     break;
             }
         return (object) array(
@@ -242,92 +316,7 @@ class APIMomo
             'data' => $data
         );
     }
-    public function testdelivery()
-    {
-        $url = $this->baseURL . '/v2/gateway/api/create';
 
-        $endpoint = 'https://test-payment.momo.vn/v2/gateway/api/create';
-        $accessKey = 'F8BBA842ECF85';
-        $secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
-        $orderInfo = 'Thanh toán bằng MOMO';
-        $partnerCode = 'MOMO';
-        $redirectUrl = 'https://congdongtheme.com/momo-qr';
-        $ipnUrl = 'https://congdongtheme.com/momo-qr';
-        $amount = '50000';
-        $orderId = time() . "";
-        $requestId = time() . "";
-        $extraData = '';
-        $requestType = 'onDelivery';
-        $partnerName = 'MoMo Payment';
-        $storeId = 'Test Store';
-        $orderGroupId = '';
-        $autoCapture = True;
-        $lang = 'vi';
-
-        $requestId =  UUID::v4();
-        $requestType = 'onDelivery';
-        $autoCapture = True;
-        $lang = 'vi';
-        $orderGroupId = '';
-        $rawHash = "accessKey=" . $accessKey . "&amount=" . $amount . "&extraData=" . $extraData . "&ipnUrl=" . $ipnUrl . "&orderId=" . $orderId . "&orderInfo=" . $orderInfo . "&partnerCode=" . APIMOMOPARTNERCODE . "&redirectUrl=" . $redirectUrl . "&requestId=" . $requestId . "&requestType=" . $requestType;
-        $signature = hash_hmac("sha256", $rawHash,  $secretKey);
-
-
-        $item = array(
-            "id" => "204727",
-            "name" => "YOMOST Bac Ha&Viet Quat 170ml",
-            "description" => "YOMOST Sua Chua Uong Bac Ha&Viet Quat 170ml/1 Hop",
-            "category" => "beverage",
-            "imageUrl" => "https://momo.vn/uploads/product1.jpg",
-            "manufacturer" => "Vinamilk",
-            "price" => 11000,
-            "quantity" => 5,
-            "unit" => "hộp",
-            "totalPrice" => 55000,
-            "taxAmount" => "200"
-        );
-        $userInfo = array(
-            "name" => "Nguyen Van A",
-            "phoneNumber" => "0999888999",
-            "email" => "email_add@domain.com",
-        );
-        $data = array(
-            'partnerCode' => APIMOMOPARTNERCODE,
-            'partnerName' => "Test",
-            'storeId' => 'MomoTestStore',
-            'requestId' => $requestId,
-            'amount' => $amount,
-            'orderId' => $orderId,
-            'item' =>  $item,
-            'userInfo' =>  $userInfo,
-            'orderInfo' => $orderInfo,
-            'requestType' => $requestType,
-            'ipnUrl' => $ipnUrl,
-            'lang' => 'vi',
-            'redirectUrl' => $redirectUrl,
-            'autoCapture' => $autoCapture,
-            'extraData' => $extraData,
-            'orderGroupId' => $orderGroupId,
-            'signature' => $signature
-        );
-
-        $response = $this->sendRequest($url, $data);
-        var_dump($response);
-        if ($response['status'] <= 200) {
-            $data = json_decode($response['data'], true);
-            return (object) array(
-                'success' => true,
-                'data' => $data
-            );
-        } elseif ($response['status'] > 200) {
-            $error = $response['data'];
-
-            return (object) array(
-                'success' => false,
-                'data' => $error
-            );
-        }
-    }
     private function sendRequest($url, $params)
     {
         $curl = curl_init();
