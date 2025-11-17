@@ -1,7 +1,7 @@
 <script type="text/html" id="tmpl-cart-action-template">
     <# if ( data.actionFound ) { #>
-        <button class="btn btn-secondary btn-update mr-3">Cập nhật giỏ hàng</button>
-        <button class="btn btn-danger btn-delete-all">Xóa giỏ hàng</button>
+        <button class="btn note-title btn-update">Cập nhật giỏ hàng</button>
+        <button class="btn note-title btn-delete-all"><i class="fa fa-trash" aria-hidden="true"></i> Xóa hết giỏ hàng</button>
 
         <# } #>
 </script>

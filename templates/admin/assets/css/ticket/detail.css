@@ -1,0 +1,17 @@
+.testimonial3 .testimonial-section::after {
+  right: 40px;
+}
+.testimonial3 .testimonial-desc img {
+  width: 50px;
+}
+.ticket-content * {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+.border-dash {
+  border-bottom-style: dashed !important;
+}

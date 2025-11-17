@@ -1,0 +1,6 @@
+.nav-tabs-new > li > a.active {
+  color: var(--font-white) !important;
+}
+.notification-item.unread {
+  background-color: var(--font-xlight);
+}

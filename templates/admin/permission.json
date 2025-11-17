@@ -1,0 +1,388 @@
+[
+  {
+    "administrator": [
+      {
+        "module": "ticket",
+        "action": "index"
+      },
+      {
+        "module": "ticket",
+        "action": "detail"
+      },
+      {
+        "module": "manage-report",
+        "action": "all-service"
+      },
+      {
+        "module": "manage",
+        "action": "customer"
+      },
+      {
+        "module": "customer",
+        "action": "index"
+      },
+      {
+        "module": "customer",
+        "action": "new"
+      },
+      {
+        "module": "customer",
+        "action": "detail"
+      },
+      {
+        "module": "manage",
+        "action": "manage-domain"
+      },
+      {
+        "module": "manage-domain",
+        "action": "index"
+      },
+      {
+        "module": "manage-domain",
+        "action": "new"
+      },
+      {
+        "module": "manage-domain",
+        "action": "detail"
+      },
+      {
+        "module": "manage",
+        "action": "manage-vps"
+      },
+      {
+        "module": "manage-vps",
+        "action": "index"
+      },
+      {
+        "module": "manage-vps",
+        "action": "new"
+      },
+      {
+        "module": "manage-vps",
+        "action": "detail"
+      },
+      {
+        "module": "manage",
+        "action": "manage-hosting"
+      },
+      {
+        "module": "manage-hosting",
+        "action": "index"
+      },
+      {
+        "module": "manage-hosting",
+        "action": "new"
+      },
+      {
+        "module": "manage-hosting",
+        "action": "detail"
+      },
+      {
+        "module": "manage",
+        "action": "manage-email"
+      },
+      {
+        "module": "manage-email",
+        "action": "index"
+      },
+      {
+        "module": "manage-email",
+        "action": "new"
+      },
+      {
+        "module": "manage-email",
+        "action": "detail"
+      },
+      {
+        "module": "manage",
+        "action": "manage-version"
+      },
+      {
+        "module": "manage-version",
+        "action": "index"
+      },
+      {
+        "module": "manage-version",
+        "action": "new"
+      },
+      {
+        "module": "manage-version",
+        "action": "detail"
+      },
+      {
+        "module": "manage",
+        "action": "license"
+      },
+      {
+        "module": "manage",
+        "action": "manage-site"
+      },
+      {
+        "module": "manage-site",
+        "action": "index"
+      },
+      {
+        "module": "manage-site",
+        "action": "new"
+      },
+      {
+        "module": "manage-site",
+        "action": "detail"
+      },
+      {
+        "module": "manage",
+        "action": "manage-plugin"
+      },
+      {
+        "module": "manage-plugin",
+        "action": "index"
+      },
+      {
+        "module": "manage-plugin",
+        "action": "new"
+      },
+      {
+        "module": "manage-plugin",
+        "action": "detail"
+      },
+      {
+        "module": "manage",
+        "action": "manage-report"
+      },
+      {
+        "module": "manage-report",
+        "action": "index"
+      },
+      {
+        "module": "manage-report",
+        "action": "hosting-list"
+      },
+      {
+        "module": "manage-report",
+        "action": "theme-list"
+      },
+      {
+        "module": "manage-report",
+        "action": "email-list"
+      },
+      {
+        "module": "manage-report",
+        "action": "plugin-list"
+      },
+      {
+        "module": "manage",
+        "action": "manage-category"
+      },
+      {
+        "module": "manage-category",
+        "action": "site-type"
+      },
+      {
+        "module": "site-type",
+        "action": "index"
+      },
+      {
+        "module": "site-type",
+        "action": "new"
+      },
+      {
+        "module": "site-type",
+        "action": "detail"
+      },
+      {
+        "module": "manage-category",
+        "action": "plugin-type"
+      },
+      {
+        "module": "plugin-type",
+        "action": "index"
+      },
+      {
+        "module": "plugin-type",
+        "action": "new"
+      },
+      {
+        "module": "plugin-type",
+        "action": "detail"
+      },
+      {
+        "module": "manage-report",
+        "action": "billing-list"
+      },
+      {
+        "module": "finance",
+        "action": "finance"
+      },
+      {
+        "module": "finance",
+        "action": "receipt"
+      },
+      {
+        "module": "receipt",
+        "action": "index"
+      },
+      {
+        "module": "receipt",
+        "action": "new"
+      },
+      {
+        "module": "receipt",
+        "action": "detail"
+      },
+      {
+        "module": "finance",
+        "action": "payment"
+      },
+      {
+        "module": "payment",
+        "action": "index"
+      },
+      {
+        "module": "payment",
+        "action": "new"
+      },
+      {
+        "module": "payment",
+        "action": "detail"
+      },
+      {
+        "module": "finance",
+        "action": "finance-category"
+      },
+      {
+        "module": "finance-category",
+        "action": "finance-type"
+      },
+      {
+        "module": "finance-type",
+        "action": "index"
+      },
+      {
+        "module": "finance-type",
+        "action": "new"
+      },
+      {
+        "module": "finance-type",
+        "action": "detail"
+      },
+      {
+        "module": "finance",
+        "action": "finance-report"
+      },
+      {
+        "module": "finance-report",
+        "action": "index"
+      },
+      {
+        "module": "setting",
+        "action": "index"
+      },
+      {
+        "module": "profile",
+        "action": "index"
+      },
+      {
+        "module": "client",
+        "action": "billing"
+      },
+      {
+        "module": "client",
+        "action": "domain"
+      },
+      {
+        "module": "client",
+        "action": "hosting"
+      },
+      {
+        "module": "client",
+        "action": "theme"
+      },
+      {
+        "module": "client",
+        "action": "checkout"
+      },
+      {
+        "module": "client",
+        "action": "cart"
+      },
+      {
+        "module": "client",
+        "action": "notification"
+      },
+      {
+        "module": "client",
+        "action": "email"
+      },
+      {
+        "module": "client",
+        "action": "plugin"
+      }
+    ],
+    "subscriber": [
+      {
+        "module": "setting",
+        "action": "index"
+      },
+      {
+        "module": "profile",
+        "action": "index"
+      },
+      {
+        "module": "inbox",
+        "action": "index"
+      },
+      {
+        "module": "client",
+        "action": "all-service"
+      },
+      {
+        "module": "client",
+        "action": "domain"
+      },
+      {
+        "module": "client",
+        "action": "hosting"
+      },
+      {
+        "module": "client",
+        "action": "theme"
+      },
+      {
+        "module": "client",
+        "action": "billing"
+      },
+      {
+        "module": "client",
+        "action": "checkout"
+      },
+      {
+        "module": "client",
+        "action": "cart"
+      },
+      {
+        "module": "client",
+        "action": "ticket"
+      },
+      {
+        "module": "ticket",
+        "action": "new"
+      },
+      {
+        "module": "ticket",
+        "action": "detail"
+      },
+      {
+        "module": "client",
+        "action": "notification"
+      },
+      {
+        "module": "client",
+        "action": "email"
+      },
+      {
+        "module": "client",
+        "action": "plugin"
+      }
+    ]
+  }
+]
